@@ -1,7 +1,7 @@
 from logging import getLogger
-from typing import Any, Dict, Optional, List, Union, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-from httpx import AsyncClient, Response, HTTPStatusError
+from httpx import AsyncClient, Response
 from pydantic import ValidationError
 
 from twowires.models import telegram_types
@@ -33,47 +33,48 @@ def check_telegram_response(
     data: dict[str, Any] = response.json()
     is_ok: bool = data.get("ok", False)
     if not is_ok:
-        raise HTTPStatusError(f"Telegram response error: {response.text}")
-    return data["result"]
+        raise ValueError(f"Telegram response error: {response.text}")
+    result: Dict[str, Any] = data["result"]
+    return result
 
 
 async def _call_api(
     method: str,
+    timeout: int = 10,
     **kwargs: Any,
 ) -> Union[List[Dict[str, Any]], Dict[str, Any]]:
     url = _api_method_url(method)
     async with AsyncClient() as client:  # type: AsyncClient
-        response = await client.post(url, data=kwargs)
+        response = await client.post(url, timeout=timeout * 2, data=kwargs)
     response.raise_for_status()
     return check_telegram_response(response)
 
 
 async def get_me() -> telegram_types.User:
     result = await _call_api("getme")
-    return telegram_types.User(**result)
+    return telegram_types.User(**result)  # type: ignore
 
 
-async def get_updates(
-    offset: Optional[int] = None,
-) -> Tuple[List[telegram_types.Update], int]:
+async def get_updates(timeout: int, offset: Optional[int] = None) -> Tuple[List[telegram_types.Update], int]:
     params = dict()
     if offset:
         params["offset"] = offset
     results = await _call_api(
         "getupdates",
+        timeout=timeout,
         **params,
     )
     updates_list = list()
     latest_update_id: Optional[int] = offset
     for result in results:
-        if not latest_update_id or latest_update_id < result["update_id"]:
-            latest_update_id = result["update_id"]
+        if not latest_update_id or (latest_update_id < result["update_id"]):  # type: ignore
+            latest_update_id = result["update_id"]  # type: ignore
         try:
-            update = telegram_types.Update(**result)
+            update = telegram_types.Update(**result)  # type: ignore
         except ValidationError:
             continue
         updates_list.append(update)
-    return updates_list, latest_update_id
+    return updates_list, latest_update_id  # type: ignore
 
 
 async def send_message(
@@ -87,13 +88,6 @@ async def send_message(
         text=text,
         reply_to_message_id=reply_to_message_id,
         parse_mode="html",
+        disable_web_page_preview=True,
     )
-    return telegram_types.Message(**result)
-
-
-async def check_preconditions():
-    me = await get_me()
-    if not me.can_join_groups:
-        raise RuntimeError(f"Talk to @botfather and enable groups access for bot.")
-    if not me.can_read_all_group_messages:
-        raise RuntimeError(f"Talk to @botfather and disable the privacy mode.")
+    return telegram_types.Message(**result)  # type: ignore

@@ -18,7 +18,7 @@ class User(BaseModel):
     can_read_all_group_messages: Optional[bool]
 
     @property
-    def readable_name(self):
+    def readable_name(self) -> str:
         return f"{self.first_name}{' '+self.last_name if self.last_name else ''}"
 
 

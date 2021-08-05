@@ -5,7 +5,6 @@ from random import choice, randrange
 from typing import List
 
 from httpx import AsyncClient
-from meta_parser import __version__ as version_info
 
 from twowires.models import ChatPermissions, Message
 from twowires.settings import get_settings
@@ -60,40 +59,28 @@ EIGHT_BALL_RU = (
 logger = getLogger()
 
 settings = get_settings()
-bot = WatchDogBot(settings.token)
-
-
-@bot.on_event("startup")
-def config_logger() -> None:
-    log_level = DEBUG if settings.debug else INFO
-    basicConfig(level=log_level)
+bot = WatchDogBot(
+    token=settings.token,
+)
+log_level = DEBUG if settings.debug else INFO
+basicConfig(level=log_level)
 
 
 @bot.on_event("startup")  # type: ignore
 async def check_preconditions() -> None:
     response = await bot.api.get_me()
-    logger.info(response.json(indent=2))
+    logger.debug(response.json(indent=2))
     if not response.can_join_groups:
         raise RuntimeError("Talk to @botfather and enable groups access for bot.")
     if not response.can_read_all_group_messages:
         raise RuntimeError("Talk to @botfather and disable the privacy mode.")
 
 
-@bot.on_command("version")  # type: ignore
-async def on_version_command(
-    message: Message,
-) -> None:
-    await bot.api.send_message(
-        chat_id=message.chat.id,
-        text=f'<a href="{version_info.__url__}">{version_info.__title__} {version_info.__version__}</a>',
-        reply_to_message_id=message.message_id,
-    )
-
-
 @bot.on_command("id")  # type: ignore
 async def on_id_command(
     message: Message,
 ) -> None:
+    logger.debug(f"id request from {message.user.readable_name} (id={message.user.id})")
     await bot.api.send_message(
         chat_id=message.chat.id,
         text=f"Your telegram identifier is <pre>{message.user.id}</pre>",
@@ -126,7 +113,11 @@ async def on_question_command(
         )
 
 
-@bot.on_command("joke")  # type: ignore
+@bot.on_command(
+    "joke",
+    "анекдот",
+    "шутка",
+)  # type: ignore
 async def on_joke_command(
     message: Message,
 ) -> None:
@@ -144,7 +135,11 @@ async def on_joke_command(
     )
 
 
-@bot.on_command("suicide")  # type: ignore
+@bot.on_command(
+    "suicide",
+    "wtf",
+    "умираю",
+)  # type: ignore
 async def on_suicide_command(
     message: Message,
 ) -> None:
@@ -162,18 +157,19 @@ async def on_suicide_command(
             until_date=datetime.now(tz=timezone.utc) + restrict_time,
         )
     except Exception as err:  # noqa, pylint: disable=broad-except
+        is_success = False
         logger.warning(err)
-        await bot.api.send_message(
-            chat_id=message.chat.id,
-            text=f"Лапки коротковаты чтоб убить {message.user.readable_name}",
-            reply_to_message_id=message.message_id,
-        )
-        return
     if is_success:
         await bot.api.send_message(
             chat_id=message.chat.id,
             text=f"Пользователь {message.user.readable_name} самовыпилился на {str(restrict_time)}",
         )
+        return None
+    await bot.api.send_message(
+        chat_id=message.chat.id,
+        text=f"Лапки коротковаты чтоб убить {message.user.readable_name}",
+        reply_to_message_id=message.message_id,
+    )
 
 
 if __name__ == "__main__":

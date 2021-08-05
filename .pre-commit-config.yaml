@@ -20,18 +20,18 @@ repos:
         entry: flake8
         language: system
         files: ^(twowires|tests)/.+\.py$
-      -
-        id: pylint
-        name: pylint
-        entry: pylint
-        language: system
-        files: ^(twowires|tests)/.+\.py$
-      -
-        id: mypy
-        name: mypy
-        entry: mypy
-        language: system
-        files: ^(twowires|tests)/.+\.py$
+#      -
+#        id: pylint
+#        name: pylint
+#        entry: pylint
+#        language: system
+#        files: ^(twowires|tests)/.+\.py$
+#      -
+#        id: mypy
+#        name: mypy
+#        entry: mypy
+#        language: system
+#        files: ^(twowires|tests)/.+\.py$
   -
     repo: https://github.com/pre-commit/pre-commit-hooks
     rev: "v3.4.0"

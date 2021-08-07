@@ -36,7 +36,7 @@ class CommandsMatcher(MatcherBase):
         tokens = list()
         for variation in self._variations:
             value = variation.format(cmd=token)
-            if self._case_sensitive:
+            if not self._case_sensitive:
                 value = value.lower()
             tokens.append(value)
         return tokens
@@ -48,7 +48,7 @@ class CommandsMatcher(MatcherBase):
     ) -> Optional[MatchedToken]:
         words = tuple(word for word in message.text.split(" ") if word)
         for i, word in enumerate(words):
-            if self._case_sensitive:
+            if not self._case_sensitive:
                 word = word.lower()
             if token == word:
                 return MatchedToken(

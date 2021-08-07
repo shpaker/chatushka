@@ -1,6 +1,6 @@
 from asyncio import run
 from datetime import datetime, timedelta, timezone
-from logging import DEBUG, INFO, basicConfig, getLogger
+from logging import DEBUG, INFO, WARNING, basicConfig, getLogger
 from random import choice, randrange
 from typing import List
 
@@ -73,13 +73,6 @@ on_sensitive_commands = CommandsMatcher(
 )
 on_events = EventsMatcher()
 on_regex = RegexMatcher()
-
-
-@on_events(EventTypes.STARTUP)
-async def check_logging() -> None:
-    log_level = DEBUG if settings.debug else INFO
-    basicConfig(level=log_level)
-    logger.debug("Debug mode is on".upper())
 
 
 @on_events(EventTypes.STARTUP)
@@ -183,10 +176,19 @@ async def on_suicide_command(
     )
 
 
+def make_bot() -> WatchDogBot:
+    instance = WatchDogBot(token=settings.token, debug=settings.debug)
+    instance.add_matcher(on_commands)
+    instance.add_matcher(on_sensitive_commands)
+    instance.add_matcher(on_events)
+    instance.add_matcher(on_regex)
+    return instance
+
+
 if __name__ == "__main__":
-    bot = WatchDogBot(token=settings.token, debug=settings.debug)
-    bot.add_matcher(on_commands)
-    bot.add_matcher(on_sensitive_commands)
-    bot.add_matcher(on_events)
-    bot.add_matcher(on_regex)
+    log_level = DEBUG if settings.debug else INFO
+    basicConfig(level=log_level)
+    logger.debug("Debug mode is on".upper())
+    getLogger("httpx").setLevel(WARNING)
+    bot = make_bot()
     run(bot.serve())

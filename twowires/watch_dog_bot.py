@@ -39,12 +39,15 @@ class WatchDogBot(EventsMatcher):
                     except Exception as err:  # noqa, pylint: disable=broad-except
                         if self.debug:
                             raise
-                        logger.erro(err)
+                        logger.error(err)
                 offset = latest_update_id + 1
             await sleep(1)
 
     async def _close(self) -> None:
         await self.call(self.api, EventTypes.SHUTDOWN)
+        for matcher in self.matchers:
+            if isinstance(matcher, EventsMatcher):
+                await matcher.call(api=self.api, token=EventTypes.SHUTDOWN)
 
     async def serve(self) -> None:
         loop = get_event_loop()
@@ -54,4 +57,7 @@ class WatchDogBot(EventsMatcher):
             except NotImplementedError:
                 break
         await self.call(self.api, EventTypes.STARTUP)
+        for matcher in self.matchers:
+            if isinstance(matcher, EventsMatcher):
+                await matcher.call(api=self.api, token=EventTypes.STARTUP)
         await self._loop()

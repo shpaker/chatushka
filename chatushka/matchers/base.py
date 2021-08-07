@@ -4,9 +4,9 @@ from collections import defaultdict
 from inspect import signature
 from typing import Any, Callable, Hashable, Iterable, Optional, Union
 
-from twowires.transports.models import Message
-from twowires.transports.telegram_bot_api import TelegramBotApi
-from twowires.types import HANDLER_TYPING, MatchedToken
+from chatushka.transports.models import Message
+from chatushka.transports.telegram_bot_api import TelegramBotApi
+from chatushka.types import HANDLER_TYPING, MatchedToken
 
 
 class MatcherBase(ABC):

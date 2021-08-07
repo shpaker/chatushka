@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "twowires"
+name = "chatushka"
 version = "0.1.0"
 description = "Bot that can make your chat explode!"
 authors = ["Aleksandr Shpak <shpaker@gmail.com>"]

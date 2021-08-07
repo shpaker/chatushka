@@ -3,13 +3,13 @@ from asyncio import ensure_future, get_event_loop, sleep
 from logging import getLogger
 from typing import Iterable, Optional
 
-from twowires.matchers import EventsMatcher, EventTypes, MatcherProtocol
-from twowires.transports.telegram_bot_api import TelegramBotApi
+from chatushka.matchers import EventsMatcher, EventTypes, MatcherProtocol
+from chatushka.transports.telegram_bot_api import TelegramBotApi
 
 logger = getLogger(__name__)
 
 
-class WatchDogBot(EventsMatcher):
+class Chatushka(EventsMatcher):
     def __init__(
         self,
         token: str,

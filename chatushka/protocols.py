@@ -1,8 +1,8 @@
 from typing import Any, Callable, Coroutine, Hashable, Iterable, Optional, Protocol, Union
 
-from twowires.transports.models import Message
-from twowires.transports.telegram_bot_api import TelegramBotApi
-from twowires.types import HANDLER_TYPING, MatchedToken
+from chatushka.transports.models import Message
+from chatushka.transports.telegram_bot_api import TelegramBotApi
+from chatushka.types import HANDLER_TYPING, MatchedToken
 
 
 class MatcherProtocol(Protocol):

@@ -6,12 +6,11 @@ from typing import List
 
 from httpx import AsyncClient
 
-from twowires.matchers import CommandsMatcher, EventTypes, RegexMatcher
-from twowires.matchers.cron import CronMatcher
-from twowires.settings import get_settings
-from twowires.transports.models import ChatPermissions, Message
-from twowires.transports.telegram_bot_api import TelegramBotApi
-from twowires.watch_dog_bot import WatchDogBot
+from chatushka.matchers import CommandsMatcher, CronMatcher, EventTypes, RegexMatcher
+from chatushka.settings import get_settings
+from chatushka.transports.models import ChatPermissions, Message
+from chatushka.transports.telegram_bot_api import TelegramBotApi
+from chatushka.watch_dog_bot import Chatushka
 
 # https://urlregex.com/
 JOKES_URL = "https://jokesrv.rubedo.cloud/"
@@ -151,7 +150,7 @@ async def on_joke_command(
     )
 
 
-@on_sensitive_commands("suicide", "wtf", "умираю")  # type: ignore
+@on_sensitive_commands("suicide", "wtf")  # type: ignore
 async def on_suicide_command(
     api: TelegramBotApi,
     message: Message,
@@ -184,8 +183,8 @@ async def on_suicide_command(
     )
 
 
-def make_bot() -> WatchDogBot:
-    instance = WatchDogBot(token=settings.token, debug=settings.debug)
+def make_bot() -> Chatushka:
+    instance = Chatushka(token=settings.token, debug=settings.debug)
     instance.add_matcher(on_commands)
     instance.add_matcher(on_sensitive_commands)
     instance.add_matcher(on_cron)

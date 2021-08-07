@@ -12,6 +12,7 @@ class CommandsMatcher(MatcherBase):
         postfixes: Union[str, tuple[str, ...]] = (),
         allow_raw: bool = False,
         case_sensitive: bool = False,
+        whitelist: Optional[tuple[int, ...]] = None,
     ) -> None:
 
         super().__init__()
@@ -28,6 +29,7 @@ class CommandsMatcher(MatcherBase):
 
         self._variations = set(variations)
         self._case_sensitive = case_sensitive
+        self._whitelist = whitelist
 
     def _cast_token(
         self,
@@ -46,6 +48,8 @@ class CommandsMatcher(MatcherBase):
         token: str,
         message: Message,
     ) -> Optional[MatchedToken]:
+        if self._whitelist and message.user.id not in self._whitelist:
+            return
         words = tuple(word for word in message.text.split(" ") if word)
         for i, word in enumerate(words):
             if not self._case_sensitive:

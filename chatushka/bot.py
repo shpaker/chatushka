@@ -5,6 +5,7 @@ from typing import Iterable, Optional
 
 from chatushka.matchers import EventsMatcher, EventTypes, MatcherProtocol
 from chatushka.transports.telegram_bot_api import TelegramBotApi
+from chatushka.utils import check_preconditions
 
 logger = getLogger(__name__)
 
@@ -20,12 +21,19 @@ class Chatushka(EventsMatcher):
         self.debug = debug
         self.api = TelegramBotApi(token)
         self.matchers = list(matchers) if matchers else list()
+        self.add_handler(EventTypes.STARTUP, check_preconditions)
 
     def add_matcher(
         self,
         matcher: MatcherProtocol,
     ):
         self.matchers.append(matcher)
+
+    def add_matchers(
+        self,
+        *matchers: MatcherProtocol,
+    ):
+        self.matchers += matchers
 
     async def _loop(self) -> None:
         offset: Optional[int] = None

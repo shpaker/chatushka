@@ -4,7 +4,7 @@ from typing import Optional
 
 from chatushka.matchers.base import MatcherBase
 from chatushka.transports.models import Message
-from chatushka.types import MatchedToken, RegexMatchKwargs
+from chatushka.models import MatchedToken, RegexMatchKwargs
 
 logger = getLogger(__name__)
 

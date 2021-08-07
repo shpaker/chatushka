@@ -2,7 +2,7 @@ from typing import Hashable, Iterable, Optional, Union
 
 from chatushka.matchers.base import MatcherBase
 from chatushka.transports.models import Message
-from chatushka.types import MatchedToken
+from chatushka.models import MatchedToken
 
 
 class CommandsMatcher(MatcherBase):

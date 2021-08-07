@@ -6,7 +6,7 @@ from typing import Any, Callable, Hashable, Iterable, Optional, Union
 
 from chatushka.transports.models import Message
 from chatushka.transports.telegram_bot_api import TelegramBotApi
-from chatushka.types import HANDLER_TYPING, MatchedToken
+from chatushka.models import HANDLER_TYPING, MatchedToken
 
 
 class MatcherBase(ABC):

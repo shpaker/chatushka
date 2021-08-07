@@ -3,7 +3,7 @@ from typing import Hashable, Iterable, Optional, Union
 
 from chatushka.matchers.base import MatcherBase
 from chatushka.transports.models import Message
-from chatushka.types import EventTypes, MatchedToken
+from chatushka.models import EventTypes, MatchedToken
 
 logger = getLogger(__name__)
 

@@ -40,7 +40,6 @@ class MatcherProtocol(Protocol):
         api: TelegramBotApi,
         token: Hashable,
         message: Optional[Message] = None,
-        args: tuple[str] = tuple(),
         kwargs: Optional[dict[str, Any]] = None,
     ) -> None:
         ...

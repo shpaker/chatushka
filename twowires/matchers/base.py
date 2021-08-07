@@ -55,8 +55,7 @@ class MatcherBase(ABC, MatcherProtocol):
                     api=api,
                     token=matched.token,
                     message=message,
-                    args=matched.args,
-                    kwargs=matched.kwargs,
+                    kwargs=matched.kwargs | dict(args=matched.args),
                 )
                 return matched
 
@@ -65,7 +64,6 @@ class MatcherBase(ABC, MatcherProtocol):
         api: TelegramBotApi,
         token: Hashable,
         message: Optional[Message] = None,
-        args: tuple[str] = tuple(),
         kwargs: Optional[dict[str, Any]] = None,
     ) -> None:
         if not kwargs:

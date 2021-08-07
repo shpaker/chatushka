@@ -166,7 +166,7 @@ async def on_suicide_command(
             chat_id=message.chat.id,
             text=f"Пользователь {message.user.readable_name} самовыпилился на {str(restrict_time)}",
         )
-        # return None
+        return None
     await api.send_message(
         chat_id=message.chat.id,
         text=f"Лапки коротковаты чтоб убить {message.user.readable_name}",

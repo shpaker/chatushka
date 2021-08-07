@@ -149,7 +149,7 @@ async def on_suicide_command(
     api: TelegramBotApi,
     message: Message,
 ) -> None:
-    restrict_time = timedelta(minutes=randrange(1, 12 * 60))
+    restrict_time = timedelta(minutes=randrange(1, 4 * 60))
     is_success = await api.restrict_chat_member(
         chat_id=message.chat.id,
         user_id=message.user.id,
@@ -164,7 +164,9 @@ async def on_suicide_command(
     if is_success:
         await api.send_message(
             chat_id=message.chat.id,
-            text=f"Пользователь {message.user.readable_name} самовыпилился на {str(restrict_time)}",
+            text=f"Пользователь {message.user.readable_name} "
+            f"самовыпилился на {restrict_time.total_seconds() * 60 * 60} часов "
+            f"и {restrict_time.total_seconds() * 60} минут",
         )
         return None
     await api.send_message(

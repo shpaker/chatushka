@@ -44,5 +44,5 @@ class MatcherProtocol(Protocol):
     ) -> None:
         ...
 
-    async def init(self):
+    async def init(self) -> None:
         ...

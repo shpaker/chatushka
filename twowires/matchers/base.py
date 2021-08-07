@@ -13,7 +13,7 @@ class MatcherBase(ABC):
 
     handlers: dict[Hashable, list[HANDLER_TYPING]]
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.handlers = defaultdict(list)
 
     def __call__(
@@ -47,7 +47,7 @@ class MatcherBase(ABC):
         self,
         api: TelegramBotApi,
         message: Message,
-    ) -> MatchedToken:
+    ) -> Optional[MatchedToken]:
         for token in self.handlers.keys():
             if matched := await self._check(token, message):
                 await self.call(
@@ -57,6 +57,7 @@ class MatcherBase(ABC):
                     kwargs=matched.kwargs | dict(args=matched.args),
                 )
                 return matched
+        return
 
     async def call(
         self,
@@ -76,7 +77,7 @@ class MatcherBase(ABC):
             sig_kwargs = {param: kwargs.get(param) for param in sig.parameters if param in kwargs}
             if iscoroutinefunction(handler):
                 await handler(**sig_kwargs)  # type: ignore
-                return
+                return None
             handler(**sig_kwargs)
 
     # pylint: disable=no-self-use
@@ -92,7 +93,7 @@ class MatcherBase(ABC):
         token: Hashable,
         message: Message,
     ) -> Optional[MatchedToken]:
-        return
+        return None
 
-    async def init(self):
+    async def init(self) -> None:
         pass

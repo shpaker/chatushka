@@ -21,7 +21,7 @@ class RegexMatcher(MatcherBase):
 
     async def _check(
         self,
-        token: str,
+        token: str,  # type: ignore
         message: Message,
     ) -> Optional[MatchedToken]:
         if founded := findall(token, message.text):

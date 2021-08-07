@@ -12,6 +12,7 @@ python = "^3.9"
 click = "^8.0.1"
 httpx = "^0.18.2"
 pydantic = {extras = ["dotenv"], version = "^1.8.2"}
+aiocron = "^1.6"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.4"

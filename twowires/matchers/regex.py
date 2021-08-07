@@ -3,8 +3,8 @@ from re import findall
 from typing import Optional
 
 from twowires.matchers.base import MatcherBase
-from twowires.matchers.types import MatchedToken, RegexMatchKwargs
 from twowires.transports.models import Message
+from twowires.types import MatchedToken, RegexMatchKwargs
 
 logger = getLogger(__name__)
 

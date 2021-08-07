@@ -1,8 +1,8 @@
 from typing import Any, Callable, Coroutine, Hashable, Iterable, Optional, Protocol, Union
 
-from twowires.matchers.types import HANDLER_TYPING, MatchedToken
 from twowires.transports.models import Message
 from twowires.transports.telegram_bot_api import TelegramBotApi
+from twowires.types import HANDLER_TYPING, MatchedToken
 
 
 class MatcherProtocol(Protocol):
@@ -42,4 +42,7 @@ class MatcherProtocol(Protocol):
         message: Optional[Message] = None,
         kwargs: Optional[dict[str, Any]] = None,
     ) -> None:
+        ...
+
+    async def init(self):
         ...

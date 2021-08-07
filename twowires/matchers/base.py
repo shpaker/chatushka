@@ -1,16 +1,15 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from asyncio import iscoroutinefunction
 from collections import defaultdict
 from inspect import signature
 from typing import Any, Callable, Hashable, Iterable, Optional, Union
 
-from twowires.matchers.protocols import MatcherProtocol
-from twowires.matchers.types import HANDLER_TYPING, MatchedToken
 from twowires.transports.models import Message
 from twowires.transports.telegram_bot_api import TelegramBotApi
+from twowires.types import HANDLER_TYPING, MatchedToken
 
 
-class MatcherBase(ABC, MatcherProtocol):
+class MatcherBase(ABC):
 
     handlers: dict[Hashable, list[HANDLER_TYPING]]
 
@@ -86,10 +85,12 @@ class MatcherBase(ABC, MatcherProtocol):
     ) -> Union[Any, Iterable[Any]]:
         return (token,)
 
-    @abstractmethod
     async def _check(
         self,
         token: Hashable,
         message: Message,
     ) -> Optional[MatchedToken]:
-        raise NotImplementedError
+        raise None
+
+    async def init(self):
+        ...

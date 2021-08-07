@@ -58,6 +58,7 @@ class WatchDogBot(EventsMatcher):
                 break
         await self.call(self.api, EventTypes.STARTUP)
         for matcher in self.matchers:
+            await matcher.init()
             if isinstance(matcher, EventsMatcher):
                 await matcher.call(api=self.api, token=EventTypes.STARTUP)
         await self._loop()

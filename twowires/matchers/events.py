@@ -2,8 +2,8 @@ from logging import getLogger
 from typing import Hashable, Iterable, Optional, Union
 
 from twowires.matchers.base import MatcherBase
-from twowires.matchers.types import EventTypes, MatchedToken
 from twowires.transports.models import Message
+from twowires.types import EventTypes, MatchedToken
 
 logger = getLogger(__name__)
 

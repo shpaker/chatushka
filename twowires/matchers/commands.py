@@ -1,8 +1,8 @@
 from typing import Hashable, Iterable, Optional, Union
 
 from twowires.matchers.base import MatcherBase
-from twowires.matchers.types import MatchedToken
 from twowires.transports.models import Message
+from twowires.types import MatchedToken
 
 
 class CommandsMatcher(MatcherBase):

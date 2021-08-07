@@ -62,7 +62,6 @@ EIGHT_BALL_RU = (
 logger = getLogger()
 settings = get_settings()
 
-on_cron = CronMatcher()
 on_commands = CommandsMatcher(
     prefixes=settings.command_prefixes,
     postfixes=settings.command_postfixes,
@@ -73,6 +72,7 @@ on_sensitive_commands = CommandsMatcher(
     postfixes=settings.command_postfixes,
     allow_raw=False,
 )
+on_cron = CronMatcher()
 on_regex = RegexMatcher()
 
 
@@ -187,8 +187,8 @@ async def on_suicide_command(
 def make_bot() -> WatchDogBot:
     instance = WatchDogBot(token=settings.token, debug=settings.debug)
     instance.add_matcher(on_commands)
-    instance.add_matcher(on_cron)
     instance.add_matcher(on_sensitive_commands)
+    instance.add_matcher(on_cron)
     instance.add_matcher(on_regex)
     instance.add_handler(EventTypes.STARTUP, check_preconditions)
     return instance

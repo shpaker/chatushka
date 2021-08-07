@@ -9,16 +9,6 @@ from chatushka.settings import get_settings
 logger = getLogger()
 settings = get_settings()
 
-on_sensitive_commands = CommandsMatcher(
-    prefixes=settings.command_prefixes,
-    postfixes=settings.command_postfixes,
-)
-on_privilege_commands = CommandsMatcher(
-    prefixes=settings.command_prefixes,
-    postfixes=settings.command_postfixes,
-    whitelist=settings.admins,
-)
-
 
 def make_regex_matcher():
     matcher = RegexMatcher()

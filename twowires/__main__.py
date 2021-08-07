@@ -6,7 +6,7 @@ from typing import List
 
 from httpx import AsyncClient
 
-from twowires.models import ChatPermissions, Message
+from twowires.transports.models import ChatPermissions, Message
 from twowires.settings import get_settings
 from twowires.watch_dog_bot import WatchDogBot
 
@@ -88,7 +88,7 @@ async def on_id_command(
     )
 
 
-@bot.on_command("8ball")  # type: ignore
+@bot.on_command("8ball", "8ball", "шарик" )  # type: ignore
 async def on_8ball_command(
     message: Message,
 ) -> None:

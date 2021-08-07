@@ -1,28 +1,18 @@
 import signal
 from asyncio import ensure_future, get_event_loop, sleep
-from enum import Enum, auto, unique
 from logging import getLogger
 from typing import Callable, Optional
 
-from twowires.commands import Commands
-from twowires.events import Events
-from twowires.messages import Messages
-from twowires.telegram_bot_api import TelegramBotApi
+from twowires.matchers import (
+    CommandsMatcher,
+    EventsMatcher,
+    RegexMatcher,
+    MatcherProtocol,
+    BotEvents,
+)
+from twowires.transports.telegram_bot_api import TelegramBotApi
 
 logger = getLogger(__name__)
-
-
-@unique
-class BotEvent(Enum):
-    STARTUP = auto()
-    SHUTDOWN = auto()
-    ON_MESSAGE = auto()
-
-
-class Managers(Enum):
-    COMMAND = Commands()
-    MESSAGE = Messages()
-    EVENT = Events()
 
 
 class WatchDogBot:
@@ -32,19 +22,23 @@ class WatchDogBot:
     ) -> None:
         super().__init__()
         self.api = TelegramBotApi(token)
+        self.matchers: dict[str, MatcherProtocol] = dict(
+            events=EventsMatcher(),
+            commands=CommandsMatcher(),
+            regex=RegexMatcher(),
+        )
 
     def __getattr__(
         self,
         name: str,
     ) -> Callable:
-        for manager in Managers:
-            suffix = manager.name.lower()
+        for suffix, matcher in self.matchers.items():
             if name == f"on_{suffix}":
-                return manager.value.decorator
+                return matcher.decorator
             if name == f"add_{suffix}_handler":
-                return manager.value.add_handler
+                return matcher.add_handler
             if name == f"check_{suffix}_handlers":
-                return manager.value.check_handlers
+                return matcher.check_handlers
         raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
 
     async def _loop(self) -> None:
@@ -54,16 +48,16 @@ class WatchDogBot:
             if updates:
                 for update in updates:
                     try:
-                        await self.check_event_handlers(BotEvent.ON_MESSAGE, message=update.message)
-                        await self.check_command_handlers(update.message)
-                        await self.check_message_handlers(update.message)
+                        for matcher in self.matchers.values():
+                            await matcher.match(update.message)
                     except Exception as err:  # noqa, pylint: disable=broad-except
                         logger.error(err)
                 offset = latest_update_id + 1
             await sleep(1)
 
     async def _close(self) -> None:
-        await self.check_event_handlers(BotEvent.SHUTDOWN)
+        events_matcher = self.matchers["event"]
+        await events_matcher.call(BotEvents.SHUTDOWN)
 
     async def serve(self) -> None:
         loop = get_event_loop()
@@ -72,5 +66,6 @@ class WatchDogBot:
                 loop.add_signal_handler(sig, callback=lambda: ensure_future(self._close()))
             except NotImplementedError:
                 break
-        await self.check_event_handlers(BotEvent.STARTUP)
+        events_matcher = self.matchers["event"]
+        await events_matcher.call(BotEvents.two_wires)
         await self._loop()

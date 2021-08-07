@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import Tuple, Union
+from typing import Union
 
 from pydantic import BaseSettings
 
@@ -9,11 +9,11 @@ SETTINGS_ENV_PREFIX = "bot_"
 class _Settings(BaseSettings):
     token: str
     debug: bool = False
-    command_prefixes: Union[str, Tuple[str, ...]] = (
+    command_prefixes: Union[str, tuple[str, ...]] = (
         "/",
         "!",
     )
-    command_postfixes: Union[str, Tuple[str, ...]] = (
+    command_postfixes: Union[str, tuple[str, ...]] = (
         "!",
         "?",
     )

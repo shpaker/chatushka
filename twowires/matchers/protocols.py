@@ -1,15 +1,15 @@
-from typing import Callable, Coroutine, Iterable, Protocol, Union, Hashable, Any, Optional
+from typing import Any, Callable, Coroutine, Hashable, Iterable, Optional, Protocol, Union
 
-from twowires.transports.models import Message
 from twowires.matchers.types import HANDLER_TYPING, MatchedToken
+from twowires.transports.models import Message
+from twowires.transports.telegram_bot_api import TelegramBotApi
 
 
 class MatcherProtocol(Protocol):
 
-    suffix: str
     handlers: dict[Hashable, list[HANDLER_TYPING]]
 
-    def decorator(
+    def __call__(
         self,
         *tokens: Hashable,
     ) -> Callable[[Callable[[], None]], None]:
@@ -30,12 +30,14 @@ class MatcherProtocol(Protocol):
 
     async def match(
         self,
+        api: TelegramBotApi,
         message: Message,
     ) -> MatchedToken:
         ...
 
     async def call(
         self,
+        api: TelegramBotApi,
         token: Hashable,
         message: Optional[Message] = None,
         args: tuple[str] = tuple(),

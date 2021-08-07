@@ -1,45 +1,31 @@
 import signal
 from asyncio import ensure_future, get_event_loop, sleep
 from logging import getLogger
-from typing import Callable, Optional
+from typing import Iterable, Optional
 
-from twowires.matchers import (
-    CommandsMatcher,
-    EventsMatcher,
-    RegexMatcher,
-    MatcherProtocol,
-    BotEvents,
-)
+from twowires.matchers import EventsMatcher, EventTypes, MatcherProtocol
 from twowires.transports.telegram_bot_api import TelegramBotApi
 
 logger = getLogger(__name__)
 
 
-class WatchDogBot:
+class WatchDogBot(EventsMatcher):
     def __init__(
         self,
         token: str,
+        matchers: Iterable[MatcherProtocol] = None,
+        debug: bool = False,
     ) -> None:
         super().__init__()
+        self.debug = debug
         self.api = TelegramBotApi(token)
-        self.matchers: dict[str, MatcherProtocol] = dict(
-            events=EventsMatcher(),
-            commands=CommandsMatcher(),
-            regex=RegexMatcher(),
-        )
+        self.matchers = list(matchers) if matchers else list()
 
-    def __getattr__(
+    def add_matcher(
         self,
-        name: str,
-    ) -> Callable:
-        for suffix, matcher in self.matchers.items():
-            if name == f"on_{suffix}":
-                return matcher.decorator
-            if name == f"add_{suffix}_handler":
-                return matcher.add_handler
-            if name == f"check_{suffix}_handlers":
-                return matcher.check_handlers
-        raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
+        matcher: MatcherProtocol,
+    ):
+        self.matchers.append(matcher)
 
     async def _loop(self) -> None:
         offset: Optional[int] = None
@@ -48,16 +34,17 @@ class WatchDogBot:
             if updates:
                 for update in updates:
                     try:
-                        for matcher in self.matchers.values():
-                            await matcher.match(update.message)
+                        for matcher in self.matchers:
+                            await matcher.match(self.api, update.message)
                     except Exception as err:  # noqa, pylint: disable=broad-except
-                        logger.error(err)
+                        if self.debug:
+                            raise
+                        logger.erro(err)
                 offset = latest_update_id + 1
             await sleep(1)
 
     async def _close(self) -> None:
-        events_matcher = self.matchers["event"]
-        await events_matcher.call(BotEvents.SHUTDOWN)
+        await self.call(self.api, EventTypes.SHUTDOWN)
 
     async def serve(self) -> None:
         loop = get_event_loop()
@@ -66,6 +53,5 @@ class WatchDogBot:
                 loop.add_signal_handler(sig, callback=lambda: ensure_future(self._close()))
             except NotImplementedError:
                 break
-        events_matcher = self.matchers["event"]
-        await events_matcher.call(BotEvents.two_wires)
+        await self.call(self.api, EventTypes.STARTUP)
         await self._loop()

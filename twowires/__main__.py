@@ -6,8 +6,10 @@ from typing import List
 
 from httpx import AsyncClient
 
-from twowires.transports.models import ChatPermissions, Message
+from twowires.matchers import CommandsMatcher, EventsMatcher, EventTypes, RegexMatcher
 from twowires.settings import get_settings
+from twowires.transports.models import ChatPermissions, Message
+from twowires.transports.telegram_bot_api import TelegramBotApi
 from twowires.watch_dog_bot import WatchDogBot
 
 # https://urlregex.com/
@@ -57,18 +59,34 @@ EIGHT_BALL_RU = (
     "Весьма сомнительно",
 )
 logger = getLogger()
-
 settings = get_settings()
-bot = WatchDogBot(
-    token=settings.token,
+
+on_commands = CommandsMatcher(
+    prefixes=settings.command_prefixes,
+    postfixes=settings.command_postfixes,
+    allow_raw=True,
 )
-log_level = DEBUG if settings.debug else INFO
-basicConfig(level=log_level)
+on_sensitive_commands = CommandsMatcher(
+    prefixes=settings.command_prefixes,
+    postfixes=settings.command_postfixes,
+    allow_raw=False,
+)
+on_events = EventsMatcher()
+on_regex = RegexMatcher()
 
 
-@bot.on_event("startup")  # type: ignore
-async def check_preconditions() -> None:
-    response = await bot.api.get_me()
+@on_events(EventTypes.STARTUP)
+async def check_logging() -> None:
+    log_level = DEBUG if settings.debug else INFO
+    basicConfig(level=log_level)
+    logger.debug("Debug mode is on".upper())
+
+
+@on_events(EventTypes.STARTUP)
+async def check_preconditions(
+    api: TelegramBotApi,
+) -> None:
+    response = await api.get_me()
     logger.debug(response.json(indent=2))
     if not response.can_join_groups:
         raise RuntimeError("Talk to @botfather and enable groups access for bot.")
@@ -76,49 +94,49 @@ async def check_preconditions() -> None:
         raise RuntimeError("Talk to @botfather and disable the privacy mode.")
 
 
-@bot.on_command("id")  # type: ignore
-async def on_id_command(
-    message: Message,
-) -> None:
-    logger.debug(f"id request from {message.user.readable_name} (id={message.user.id})")
-    await bot.api.send_message(
-        chat_id=message.chat.id,
-        text=f"Your telegram identifier is <pre>{message.user.id}</pre>",
-        reply_to_message_id=message.message_id,
-    )
-
-
-@bot.on_command("8ball", "8ball", "шарик" )  # type: ignore
-async def on_8ball_command(
-    message: Message,
-) -> None:
-    await bot.api.send_message(
-        chat_id=message.chat.id,
-        text=choice(EIGHT_BALL_RU),
-        reply_to_message_id=message.message_id,
-    )
-
-
-@bot.on_message(r"\?")  # type: ignore
+@on_regex(r"\?")  # type: ignore
 async def on_question_command(
+    api: TelegramBotApi,
     message: Message,
     matched: List[str],  # noqa, pylint: disable=unused-argument
 ) -> None:
     rand_int = randrange(5)
     if rand_int == 3:
-        await bot.api.send_message(
+        await api.send_message(
             chat_id=message.chat.id,
             text=choice(EIGHT_BALL_RU),
             reply_to_message_id=message.message_id,
         )
 
 
-@bot.on_command(
-    "joke",
-    "анекдот",
-    "шутка",
-)  # type: ignore
+@on_commands("id")
+async def on_id_command(
+    api: TelegramBotApi,
+    message: Message,
+) -> None:
+    logger.debug(f"id request from {message.user.readable_name} (id={message.user.id})")
+    await api.send_message(
+        chat_id=message.chat.id,
+        text=f"Your telegram identifier is <pre>{message.user.id}</pre>",
+        reply_to_message_id=message.message_id,
+    )
+
+
+@on_commands("8ball", "8ball", "шарик")  # type: ignore
+async def on_8ball_command(
+    api: TelegramBotApi,
+    message: Message,
+) -> None:
+    await api.send_message(
+        chat_id=message.chat.id,
+        text=choice(EIGHT_BALL_RU),
+        reply_to_message_id=message.message_id,
+    )
+
+
+@on_commands("joke", "анекдот", "шутка")  # type: ignore
 async def on_joke_command(
+    api: TelegramBotApi,
     message: Message,
 ) -> None:
     async with AsyncClient() as client:  # type: AsyncClient
@@ -129,43 +147,36 @@ async def on_joke_command(
 
         except Exception:  # noqa, pylint: disable=broad-except
             return
-    await bot.api.send_message(
+    await api.send_message(
         chat_id=message.chat.id,
         text=joke,
     )
 
 
-@bot.on_command(
-    "suicide",
-    "wtf",
-    "умираю",
-)  # type: ignore
+@on_sensitive_commands("suicide", "wtf", "умираю")  # type: ignore
 async def on_suicide_command(
+    api: TelegramBotApi,
     message: Message,
 ) -> None:
     restrict_time = timedelta(minutes=randrange(1, 12 * 60))
-    try:
-        is_success = await bot.api.restrict_chat_member(
-            chat_id=message.chat.id,
-            user_id=message.user.id,
-            permissions=ChatPermissions(
-                can_send_messages=False,
-                can_send_media_messages=False,
-                can_send_polls=False,
-                can_send_other_messages=False,
-            ),
-            until_date=datetime.now(tz=timezone.utc) + restrict_time,
-        )
-    except Exception as err:  # noqa, pylint: disable=broad-except
-        is_success = False
-        logger.warning(err)
+    is_success = await api.restrict_chat_member(
+        chat_id=message.chat.id,
+        user_id=message.user.id,
+        permissions=ChatPermissions(
+            can_send_messages=False,
+            can_send_media_messages=False,
+            can_send_polls=False,
+            can_send_other_messages=False,
+        ),
+        until_date=datetime.now(tz=timezone.utc) + restrict_time,
+    )
     if is_success:
-        await bot.api.send_message(
+        await api.send_message(
             chat_id=message.chat.id,
             text=f"Пользователь {message.user.readable_name} самовыпилился на {str(restrict_time)}",
         )
-        return None
-    await bot.api.send_message(
+        # return None
+    await api.send_message(
         chat_id=message.chat.id,
         text=f"Лапки коротковаты чтоб убить {message.user.readable_name}",
         reply_to_message_id=message.message_id,
@@ -173,4 +184,9 @@ async def on_suicide_command(
 
 
 if __name__ == "__main__":
+    bot = WatchDogBot(token=settings.token, debug=settings.debug)
+    bot.add_matcher(on_commands)
+    bot.add_matcher(on_sensitive_commands)
+    bot.add_matcher(on_events)
+    bot.add_matcher(on_regex)
     run(bot.serve())

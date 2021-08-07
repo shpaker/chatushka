@@ -1,14 +1,14 @@
 from enum import Enum, auto, unique
-from typing import Callable, Coroutine, Union, Any, TypedDict, NamedTuple, Hashable
+from typing import Any, Callable, Coroutine, Hashable, NamedTuple, TypedDict, Union
 
 HANDLER_TYPING = Union[
     Callable[[Any], None],
-    Callable[[Any], Coroutine[None]],
+    Callable[[Any], Coroutine[Any, Any, Any]],
 ]
 
 
 class RegexMatchKwargs(TypedDict):
-    founded: tuple[str, ...]
+    matched: tuple[str, ...]
 
 
 class MatchedToken(NamedTuple):
@@ -18,7 +18,7 @@ class MatchedToken(NamedTuple):
 
 
 @unique
-class BotEvents(Enum):
-    two_wires = auto()
+class EventTypes(Enum):
+    STARTUP = auto()
     SHUTDOWN = auto()
-    ON_MESSAGE = auto()
+    MESSAGE = auto()

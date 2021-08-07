@@ -1,18 +1,23 @@
 from abc import ABC, abstractmethod
 from asyncio import iscoroutinefunction
 from collections import defaultdict
-from typing import Iterable, Union, Callable, Any, Optional, Hashable
+from inspect import signature
+from typing import Any, Callable, Hashable, Iterable, Optional, Union
 
-from twowires.transports.models import Message
 from twowires.matchers.protocols import MatcherProtocol
 from twowires.matchers.types import HANDLER_TYPING, MatchedToken
+from twowires.transports.models import Message
+from twowires.transports.telegram_bot_api import TelegramBotApi
 
 
 class MatcherBase(ABC, MatcherProtocol):
 
-    handlers: dict[Hashable, list[HANDLER_TYPING]] = defaultdict(list)
+    handlers: dict[Hashable, list[HANDLER_TYPING]]
 
-    def decorator(
+    def __init__(self):
+        self.handlers = defaultdict(list)
+
+    def __call__(
         self,
         *tokens: Hashable,
     ) -> Callable[[Callable[[], None]], None]:
@@ -29,7 +34,9 @@ class MatcherBase(ABC, MatcherProtocol):
         handler: HANDLER_TYPING,
     ) -> None:
         for raw_token in tokens:
-            prepared = self._cast_token(raw_token.strip())
+            if isinstance(raw_token, str):
+                raw_token = raw_token.strip()
+            prepared = self._cast_token(raw_token)
             if not isinstance(prepared, (list, tuple, set)):
                 prepared = (prepared,)
             for token in prepared:
@@ -37,11 +44,13 @@ class MatcherBase(ABC, MatcherProtocol):
 
     async def match(
         self,
+        api: TelegramBotApi,
         message: Message,
     ) -> MatchedToken:
         for token in self.handlers.keys():
             if matched := await self._check(token, message):
                 await self.call(
+                    api=api,
                     token=matched.token,
                     message=message,
                     args=matched.args,
@@ -51,6 +60,7 @@ class MatcherBase(ABC, MatcherProtocol):
 
     async def call(
         self,
+        api: TelegramBotApi,
         token: Hashable,
         message: Optional[Message] = None,
         args: tuple[str] = tuple(),
@@ -58,15 +68,19 @@ class MatcherBase(ABC, MatcherProtocol):
     ) -> None:
         if not kwargs:
             kwargs = dict()
-        kwargs | dict(message=message, token=token)
-        handlers = self.handlers[token]
+        kwargs = kwargs | dict(api=api, message=message, token=token)
+        handlers = self.handlers.get(token)
+        if not handlers:
+            return
         for handler in handlers:
+            sig = signature(handler)
+            sig_kwargs = {param: kwargs.get(param) for param in sig.parameters if param in kwargs}
             if iscoroutinefunction(handler):
-                await handler(*args, **kwargs)  # type: ignore
+                await handler(**sig_kwargs)  # type: ignore
                 return
-            handler(*args, **kwargs)
+            handler(**sig_kwargs)
 
-    async def _cast_token(
+    def _cast_token(
         self,
         token: Hashable,
     ) -> Union[Any, Iterable[Any]]:

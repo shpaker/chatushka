@@ -1,4 +1,4 @@
-from typing import Optional, Union, Iterable, Hashable
+from typing import Hashable, Iterable, Optional, Union
 
 from twowires.matchers.base import MatcherBase
 from twowires.matchers.types import MatchedToken
@@ -6,9 +6,6 @@ from twowires.transports.models import Message
 
 
 class CommandsMatcher(MatcherBase):
-
-    suffix = "command"
-
     def __init__(
         self,
         prefixes: Union[str, tuple[str, ...]] = ("/",),
@@ -17,6 +14,7 @@ class CommandsMatcher(MatcherBase):
         case_sensitive: bool = False,
     ) -> None:
 
+        super().__init__()
         if isinstance(prefixes, str):
             prefixes = (prefixes,)
         if isinstance(postfixes, str):
@@ -31,7 +29,7 @@ class CommandsMatcher(MatcherBase):
         self._variations = set(variations)
         self._case_sensitive = case_sensitive
 
-    async def _cast_token(
+    def _cast_token(
         self,
         token: Hashable,
     ) -> Union[Hashable, Iterable[Hashable]]:
@@ -55,5 +53,5 @@ class CommandsMatcher(MatcherBase):
             if token == word:
                 return MatchedToken(
                     token=token,
-                    args=tuple(words[i+1:]),
+                    args=tuple(words[i + 1 :]),  # noqa
                 )

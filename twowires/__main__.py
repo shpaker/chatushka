@@ -6,7 +6,7 @@ from typing import List
 
 from httpx import AsyncClient
 
-from twowires.matchers import CommandsMatcher, EventsMatcher, EventTypes, RegexMatcher
+from twowires.matchers import CommandsMatcher, EventTypes, RegexMatcher
 from twowires.settings import get_settings
 from twowires.transports.models import ChatPermissions, Message
 from twowires.transports.telegram_bot_api import TelegramBotApi
@@ -71,11 +71,9 @@ on_sensitive_commands = CommandsMatcher(
     postfixes=settings.command_postfixes,
     allow_raw=False,
 )
-on_events = EventsMatcher()
 on_regex = RegexMatcher()
 
 
-@on_events(EventTypes.STARTUP)
 async def check_preconditions(
     api: TelegramBotApi,
 ) -> None:
@@ -180,8 +178,8 @@ def make_bot() -> WatchDogBot:
     instance = WatchDogBot(token=settings.token, debug=settings.debug)
     instance.add_matcher(on_commands)
     instance.add_matcher(on_sensitive_commands)
-    instance.add_matcher(on_events)
     instance.add_matcher(on_regex)
+    instance.add_handler(EventTypes.STARTUP, check_preconditions)
     return instance
 
 

@@ -33,6 +33,8 @@ class MatcherBase(ABC, MatcherProtocol):
         tokens: Union[Hashable, Iterable[Hashable]],
         handler: HANDLER_TYPING,
     ) -> None:
+        if not isinstance(tokens, (list, tuple, set)):
+            tokens = (tokens,)
         for raw_token in tokens:
             if isinstance(raw_token, str):
                 raw_token = raw_token.strip()

@@ -8,6 +8,7 @@ logger = getLogger(__name__)
 
 
 class CronMatcher(MatcherBase):
-    def init(self):
-        for token, handler in self.handlers.items():
-            crontab(token, func=handler)
+    async def init(self):
+        for token, handlers in self.handlers.items():
+            for handler in handlers:
+                crontab(token, func=handler)

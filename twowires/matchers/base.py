@@ -90,7 +90,7 @@ class MatcherBase(ABC):
         token: Hashable,
         message: Message,
     ) -> Optional[MatchedToken]:
-        raise None
+        return
 
     async def init(self):
-        ...
+        pass

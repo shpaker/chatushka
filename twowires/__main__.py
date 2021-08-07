@@ -187,6 +187,7 @@ async def on_suicide_command(
 def make_bot() -> WatchDogBot:
     instance = WatchDogBot(token=settings.token, debug=settings.debug)
     instance.add_matcher(on_commands)
+    instance.add_matcher(on_cron)
     instance.add_matcher(on_sensitive_commands)
     instance.add_matcher(on_regex)
     instance.add_handler(EventTypes.STARTUP, check_preconditions)

@@ -33,6 +33,10 @@ class Message(BaseModel):
     user: User = Field(..., alias="from")
     chat: Chat
     text: str
+    reply_to_message: Optional["Message"] = None
+
+
+Message.update_forward_refs()
 
 
 class Update(BaseModel):

@@ -17,6 +17,10 @@ class _Settings(BaseSettings):
         "!",
     )
     allow_raw_command: bool = True
+    admins: tuple[int, ...] = (
+        514026725,
+        147727588,
+    )
 
     class Config:
         env_prefix = SETTINGS_ENV_PREFIX

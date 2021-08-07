@@ -201,7 +201,7 @@ async def on_mute_command(
         return None
     await api.send_message(
         chat_id=message.chat.id,
-        text=f"Лапки коротковаты чтоб убить {message.reply_to_message.user.readable_name}",
+        text=f"Лапки коротковаты чтоб покарать {message.reply_to_message.user.readable_name}",
         reply_to_message_id=message.message_id,
     )
 

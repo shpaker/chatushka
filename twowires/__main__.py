@@ -194,10 +194,13 @@ def make_bot() -> WatchDogBot:
     return instance
 
 
-if __name__ == "__main__":
-    log_level = DEBUG if settings.debug else INFO
-    basicConfig(level=log_level)
+def main():
+    basicConfig(level=DEBUG if settings.debug else INFO)
     logger.debug("Debug mode is on".upper())
     getLogger("httpx").setLevel(WARNING)
     bot = make_bot()
     run(bot.serve())
+
+
+if __name__ == "__main__":
+    main()

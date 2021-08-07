@@ -79,12 +79,14 @@ class MatcherBase(ABC):
                 return
             handler(**sig_kwargs)
 
+    # pylint: disable=no-self-use
     def _cast_token(
         self,
         token: Hashable,
     ) -> Union[Any, Iterable[Any]]:
         return (token,)
 
+    # pylint: disable=unused-argument
     async def _check(
         self,
         token: Hashable,

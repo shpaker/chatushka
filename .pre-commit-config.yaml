@@ -20,12 +20,12 @@ repos:
         entry: flake8
         language: system
         files: ^(twowires|tests)/.+\.py$
-#      -
-#        id: pylint
-#        name: pylint
-#        entry: pylint
-#        language: system
-#        files: ^(twowires|tests)/.+\.py$
+      -
+        id: pylint
+        name: pylint
+        entry: pylint
+        language: system
+        files: ^(twowires|tests)/.+\.py$
 #      -
 #        id: mypy
 #        name: mypy

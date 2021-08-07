@@ -2,9 +2,9 @@ from logging import getLogger
 from re import findall
 from typing import Optional
 
-from twowires.matchers.base import MatcherBase
-from twowires.transports.models import Message
-from twowires.types import MatchedToken, RegexMatchKwargs
+from chatushka.matchers.base import MatcherBase
+from chatushka.transports.models import Message
+from chatushka.types import MatchedToken, RegexMatchKwargs
 
 logger = getLogger(__name__)
 

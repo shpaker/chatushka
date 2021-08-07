@@ -15,7 +15,6 @@ class _Settings(BaseSettings):
     )
     command_postfixes: Union[str, tuple[str, ...]] = (
         "!",
-        "?",
     )
     allow_raw_command: bool = True
 

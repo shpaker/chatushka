@@ -1,9 +1,9 @@
 from logging import getLogger
 from typing import Hashable, Iterable, Optional, Union
 
-from twowires.matchers.base import MatcherBase
-from twowires.transports.models import Message
-from twowires.types import EventTypes, MatchedToken
+from chatushka.matchers.base import MatcherBase
+from chatushka.transports.models import Message
+from chatushka.types import EventTypes, MatchedToken
 
 logger = getLogger(__name__)
 

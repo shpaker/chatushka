@@ -5,8 +5,8 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from httpx import AsyncClient, Response
 from pydantic import ValidationError
 
-from twowires.transports import models
-from twowires.transports.models import ChatPermissions, ChatType
+from chatushka.transports import models
+from chatushka.transports.models import ChatPermissions, ChatType
 
 ALLOWED_CHAT_TYPES_FOR_UPDATES = (
     ChatType.GROUP,

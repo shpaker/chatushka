@@ -1,11 +1,11 @@
 [tool.poetry]
 name = "chatushka"
-version = "0.3.0"
+version = "0.3.1"
 description = "Bot that can make your chat explode!"
 authors = ["Aleksandr Shpak <shpaker@gmail.com>"]
 readme = "readme.md"
-homepage = "https://github.com/shpaker/twowires"
-repository = "https://github.com/shpaker/twowires"
+homepage = "https://github.com/shpaker/chatushka"
+repository = "https://github.com/shpaker/chatushka"
 
 [tool.poetry.dependencies]
 python = "^3.9"

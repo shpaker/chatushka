@@ -177,7 +177,7 @@ async def on_mute_command(
     try:
         restrict_time = timedelta(hours=int(args[0]))
     except ValueError:
-        restrict_time = timedelta(minutes=randrange(5, 60))
+        restrict_time = timedelta(minutes=randrange(10, 30))
         await api.send_message(
             chat_id=message.chat.id,
             text=f"🧐 не удалось спарсить значение и я решил, "

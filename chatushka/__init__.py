@@ -1,4 +1,4 @@
-from chatushka.watch_dog_bot import Chatushka
+from chatushka.bot import Chatushka
 
 __all__ = (
     "Chatushka",

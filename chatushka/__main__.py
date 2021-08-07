@@ -158,13 +158,6 @@ async def on_mute_command(
 ) -> None:
     if message.user.id not in settings.admins:
         return None
-    if not args:
-        await api.send_message(
-            chat_id=message.chat.id,
-            text=f"🧐 уточни времянной период на который необходимо замьютить пользователя",
-            reply_to_message_id=message.message_id,
-        )
-        return None
 
     if not message.reply_to_message:
         await api.send_message(
@@ -176,7 +169,7 @@ async def on_mute_command(
 
     try:
         restrict_time = timedelta(hours=int(args[0]))
-    except ValueError:
+    except (ValueError, IndexError):
         restrict_time = timedelta(minutes=randrange(10, 30))
         await api.send_message(
             chat_id=message.chat.id,
@@ -208,7 +201,7 @@ async def on_mute_command(
         return None
     await api.send_message(
         chat_id=message.chat.id,
-        text=f"Лапки коротковаты чтоб убить {message.user.readable_name}",
+        text=f"Лапки коротковаты чтоб убить {message.reply_to_message.user.readable_name}",
         reply_to_message_id=message.message_id,
     )
 

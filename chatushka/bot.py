@@ -58,13 +58,13 @@ class Chatushka(EventsMatcher):
                 await matcher.call(api=self.api, token=EventTypes.SHUTDOWN)
 
     async def serve(self) -> None:
+        await self.call(self.api, EventTypes.STARTUP)
         loop = get_event_loop()
         for sig in (signal.SIGINT, signal.SIGTERM):
             try:
                 loop.add_signal_handler(sig, callback=lambda: ensure_future(self._close()))
             except NotImplementedError:
                 break
-        await self.call(self.api, EventTypes.STARTUP)
         for matcher in self.matchers:
             await matcher.init()
             if isinstance(matcher, EventsMatcher):

@@ -77,7 +77,7 @@ class MatcherBase(ABC):
             sig_kwargs = {param: kwargs.get(param) for param in sig.parameters if param in kwargs}
             if iscoroutinefunction(handler):
                 await handler(**sig_kwargs)  # type: ignore
-                return None
+                continue
             handler(**sig_kwargs)
 
     # pylint: disable=no-self-use

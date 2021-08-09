@@ -46,7 +46,7 @@ async def mute(
     if not message.reply_to_message:
         await api.send_message(
             chat_id=message.chat.id,
-            text=f"🧐 Комманда должна быть реплаем",
+            text=f"🧐 Команда должна быть реплаем",
             reply_to_message_id=message.message_id,
         )
         return None

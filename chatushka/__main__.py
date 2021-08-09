@@ -4,6 +4,9 @@ from logging import DEBUG, INFO, WARNING, basicConfig, getLogger
 from chatushka import samples
 from chatushka.bot import Chatushka
 from chatushka.matchers import CommandsMatcher, RegexMatcher
+from chatushka.samples.heroes import add_heroes_matchers
+
+from chatushka.services.mongodb.wrapper import MongoDBWrapper
 from chatushka.settings import get_settings
 
 logger = getLogger()
@@ -37,7 +40,7 @@ def make_sensitive_matcher():
     return matcher
 
 
-def make_privilege_commands():
+def make_privilege_matcher():
     matcher = CommandsMatcher(
         prefixes=settings.command_prefixes,
         postfixes=settings.command_postfixes,
@@ -49,10 +52,13 @@ def make_privilege_commands():
 
 def make_bot() -> Chatushka:
     instance = Chatushka(token=settings.token, debug=settings.debug)
+    wrapper = MongoDBWrapper()
+    wrapper.add_event_handlers(instance)
+    add_heroes_matchers(instance)
     instance.add_matchers(
         make_commands_matcher(),
         make_sensitive_matcher(),
-        make_privilege_commands(),
+        make_privilege_matcher(),
         make_regex_matcher(),
     )
     return instance

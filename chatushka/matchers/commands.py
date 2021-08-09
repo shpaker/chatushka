@@ -19,7 +19,7 @@ class CommandsMatcher(MatcherBase):
         if isinstance(prefixes, str):
             prefixes = (prefixes,)
         if isinstance(postfixes, str):
-            prefixes = (prefixes,)
+            postfixes = (postfixes,)
 
         variations = [prefix + "{cmd}" for prefix in prefixes if prefix.strip()] + [
             "{cmd}" + postfix for postfix in postfixes if postfix.strip()

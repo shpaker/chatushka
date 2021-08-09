@@ -1,31 +1,38 @@
 from functools import lru_cache
 from typing import Union
 
-from pydantic import BaseSettings
+from pydantic import BaseModel
 
-SETTINGS_ENV_PREFIX = "bot_"
+from chatushka.samples.heroes.settings import HeroesSettings
+from chatushka.utils import ServiceSettingsBase
 
 
-class _Settings(BaseSettings):
+class SamplesSubSettings(BaseModel):
+    heroes: HeroesSettings = HeroesSettings()
+
+
+class MongoDBSubSettings(BaseModel):
+    database: str = "chatushka"
+
+
+class PaginationSubSettings(BaseModel):
+    per_page_default: int = 16
+    per_page_maximum: int = 64
+
+
+class _Settings(ServiceSettingsBase):
     token: str
     debug: bool = False
-    command_prefixes: Union[str, tuple[str, ...]] = (
-        "/",
-        "!",
-    )
-    command_postfixes: Union[str, tuple[str, ...]] = (
-        "!",
-    )
+    command_prefixes: Union[str, tuple[str, ...]] = ("/", "!")
+    command_postfixes: Union[str, tuple[str, ...]] = "!"
     allow_raw_command: bool = True
     admins: tuple[int, ...] = (
         514026725,
         147727588,
     )
-
-    class Config:
-        env_prefix = SETTINGS_ENV_PREFIX
-        env_file = ".env"
-        allow_mutation = False
+    mongodb: MongoDBSubSettings = MongoDBSubSettings()
+    pagination: PaginationSubSettings = PaginationSubSettings()
+    samples: SamplesSubSettings = SamplesSubSettings()
 
 
 @lru_cache

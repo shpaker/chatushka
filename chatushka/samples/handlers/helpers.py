@@ -75,7 +75,7 @@ async def mute_handler(
     restrict_user: Optional[User] = None
     restrict_time = None
 
-    if not privileges or (not privileges.can_restrict_members and not privileges.status.CREATOR):
+    if not privileges or not (privileges.can_restrict_members or privileges.status.CREATOR):
         restrict_user = message.user
         restrict_time = timedelta(minutes=randrange(10, 30))
         text_tmpl = choice(MuteMessages.ACCIDENT.value)

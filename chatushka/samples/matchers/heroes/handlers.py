@@ -5,7 +5,7 @@ from chatushka.samples.matchers.heroes.utils import extract_state
 from chatushka.transports.models import Message
 from chatushka.transports.telegram_bot_api import TelegramBotApi
 
-MESSAGE_TITLE = "✨💫✨ <b>ГЕРОЙСКИЙ КАЛЕНДАРЬ</b> 💫✨💫"
+MESSAGE_TITLE = "✨💫 <b>ГЕРОЙСКИЙ КАЛЕНДАРЬ</b> 💫✨"
 
 
 async def activate_heroes_handler(

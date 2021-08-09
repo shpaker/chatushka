@@ -1,11 +1,13 @@
 from asyncio import run
 from logging import DEBUG, INFO, WARNING, basicConfig, getLogger
 
-from chatushka import samples
-from chatushka.bot import Chatushka
+from chatushka import Chatushka
 from chatushka.matchers import CommandsMatcher, RegexMatcher
-from chatushka.samples.heroes import add_heroes_matchers
-
+from chatushka.samples.handlers.eight_ball import eight_ball_answer_handler, eight_ball_handler
+from chatushka.samples.handlers.helpers import mute_handler, suicide_handler
+from chatushka.samples.handlers.id import user_id_handler
+from chatushka.samples.handlers.jokes import jokes_handler
+from chatushka.samples.matchers.heroes.matchers import add_heroes_matchers
 from chatushka.services.mongodb.wrapper import MongoDBWrapper
 from chatushka.settings import get_settings
 
@@ -15,7 +17,7 @@ settings = get_settings()
 
 def make_regex_matcher():
     matcher = RegexMatcher()
-    matcher.add_handler(r"\?", samples.random_eight_ball_answer)
+    matcher.add_handler(r"\?", eight_ball_answer_handler)
     return matcher
 
 
@@ -25,9 +27,9 @@ def make_commands_matcher():
         postfixes=settings.command_postfixes,
         allow_raw=True,
     )
-    matcher.add_handler("id", samples.user_id)
-    matcher.add_handler("joke", samples.joke)
-    matcher.add_handler(("8ball", "ball8", "b8", "8b"), samples.eight_ball_answer)
+    matcher.add_handler("id", user_id_handler)
+    matcher.add_handler("joke", jokes_handler)
+    matcher.add_handler(("8ball", "ball8", "b8", "8b"), eight_ball_handler)
     return matcher
 
 
@@ -36,7 +38,7 @@ def make_sensitive_matcher():
         prefixes=settings.command_prefixes,
         postfixes=settings.command_postfixes,
     )
-    matcher.add_handler(("suicide", "wtf"), samples.suicide)
+    matcher.add_handler(("suicide", "wtf"), suicide_handler)
     return matcher
 
 
@@ -44,9 +46,8 @@ def make_privilege_matcher():
     matcher = CommandsMatcher(
         prefixes=settings.command_prefixes,
         postfixes=settings.command_postfixes,
-        whitelist=settings.admins,
     )
-    matcher.add_handler("mute", samples.mute)
+    matcher.add_handler("mute", mute_handler)
     return matcher
 
 

@@ -3,7 +3,6 @@ from random import choice, randrange
 from chatushka.transports.models import Message
 from chatushka.transports.telegram_bot_api import TelegramBotApi
 
-
 EIGHT_BALL_EN = (
     "It is certain",
     "It is decidedly so",
@@ -50,7 +49,7 @@ EIGHT_BALL_RU = (
 )
 
 
-async def eight_ball_answer(
+async def eight_ball_handler(
     api: TelegramBotApi,
     message: Message,
 ) -> None:
@@ -61,7 +60,7 @@ async def eight_ball_answer(
     )
 
 
-async def random_eight_ball_answer(
+async def eight_ball_answer_handler(
     api: TelegramBotApi,
     message: Message,
     matched: list[str],  # noqa, pylint: disable=unused-argument

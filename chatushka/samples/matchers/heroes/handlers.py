@@ -1,7 +1,7 @@
-from chatushka.samples.heroes.cruds.activations import set_heroes_activation, read_all_heroes_activations
-from chatushka.samples.heroes.cruds.months import get_current_month
-from chatushka.samples.heroes.cruds.weeks import get_current_week
-from chatushka.samples.heroes.utils import extract_state
+from chatushka.samples.matchers.heroes.cruds.activations import read_all_heroes_activations, set_heroes_activation
+from chatushka.samples.matchers.heroes.cruds.months import get_current_month
+from chatushka.samples.matchers.heroes.cruds.weeks import get_current_week
+from chatushka.samples.matchers.heroes.utils import extract_state
 from chatushka.transports.models import Message
 from chatushka.transports.telegram_bot_api import TelegramBotApi
 
@@ -37,9 +37,9 @@ async def activate_heroes_handler(
         state=state,
     )
     state_msg = (
-        "🙂 Подписка на периодическое издание \"Геройский календарь\" оформлена"
-    ) if state else (
-        "😏 Вы отписались от периодического издания \"Геройский календарь\""
+        ('🙂 Подписка на периодическое издание "Геройский календарь" оформлена')
+        if state
+        else ('😏 Вы отписались от периодического издания "Геройский календарь"')
     )
     await api.send_message(
         chat_id=message.chat.id,
@@ -57,15 +57,9 @@ async def heroes_month_handler(
         try:
             await api.send_message(
                 chat_id=activation.chat_id,
-                text=(
-                    f"{MESSAGE_TITLE}\n"
-                    f"\n"
-                    f"<i>Выпуск №{month.number}\n</i>"
-                    f"\n"
-                    f"{month.message}\n"
-                ),
+                text=(f"{MESSAGE_TITLE}\n" f"\n" f"<i>Выпуск №{month.number}\n</i>" f"\n" f"{month.message}\n"),
             )
-        except Exception:  # noqa, pylint: disable=too-bare-exception
+        except Exception:  # noqa, pylint: disable=broad-except
             continue
 
 
@@ -78,13 +72,7 @@ async def heroes_week_handler(
         try:
             await api.send_message(
                 chat_id=activation.chat_id,
-                text=(
-                    f"{MESSAGE_TITLE}\n"
-                    f"\n"
-                    f"<i>Выпуск №{week.number}\n</i>"
-                    f"\n"
-                    f"{week.message}\n"
-                ),
+                text=(f"{MESSAGE_TITLE}\n" f"\n" f"<i>Выпуск №{week.number}\n</i>" f"\n" f"{week.message}\n"),
             )
-        except Exception:  # noqa, pylint: disable=too-bare-exception
+        except Exception:  # noqa, pylint: disable=broad-except
             continue

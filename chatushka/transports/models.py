@@ -9,6 +9,11 @@ class ChatType(str, Enum):
     SUPERGROUP = "supergroup"
 
 
+class ChatMemberStatuses(str, Enum):
+    CREATOR = "creator"
+    ADMINISTRATOR = "administrator"
+
+
 class User(BaseModel):
     id: int
     is_bot: bool
@@ -20,6 +25,31 @@ class User(BaseModel):
     @property
     def readable_name(self) -> str:
         return f"{self.first_name}{' '+self.last_name if self.last_name else ''}"
+
+
+class ChatMemberBase(BaseModel):
+    status: ChatMemberStatuses
+    user: User
+    is_anonymous: bool
+    custom_title: Optional[str]
+
+
+class ChatMemberOwner(ChatMemberBase):
+    ...
+
+
+class ChatMemberAdministrator(ChatMemberBase):
+    can_be_edited: bool
+    can_manage_chat: bool
+    can_delete_messages: bool
+    can_manage_voice_chats: bool
+    can_restrict_members: bool
+    can_promote_members: bool
+    can_change_info: bool
+    can_invite_users: bool
+    can_post_messages: Optional[bool]
+    can_edit_messages: Optional[bool]
+    can_pin_messages: Optional[bool]
 
 
 class Chat(BaseModel):

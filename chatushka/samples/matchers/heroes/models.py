@@ -4,7 +4,7 @@ from typing import Optional, TypedDict
 
 from pydantic import BaseModel, Field
 
-from chatushka.samples.heroes.utils import get_week_message, get_month_message
+from chatushka.samples.matchers.heroes.utils import get_month_message, get_week_message
 
 
 class CalendarTypes(str, Enum):

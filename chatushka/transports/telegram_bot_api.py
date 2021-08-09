@@ -6,7 +6,13 @@ from httpx import AsyncClient, Response
 from pydantic import ValidationError
 
 from chatushka.transports import models
-from chatushka.transports.models import ChatPermissions, ChatType
+from chatushka.transports.models import (
+    ChatMemberAdministrator,
+    ChatMemberOwner,
+    ChatMemberStatuses,
+    ChatPermissions,
+    ChatType,
+)
 
 ALLOWED_CHAT_TYPES_FOR_UPDATES = (
     ChatType.GROUP,
@@ -41,7 +47,8 @@ class TelegramBotApi:
         is_ok: bool = data.get("ok", False)
         if not is_ok:
             logger.warning(response.text)
-            raise ValueError(f"Telegram response error: {response.text}")
+            raise ValueError(f"Telegram response error: {response.text}\n{data}")
+
         result: Dict[str, Any] = data["result"]
         return result
 
@@ -119,4 +126,21 @@ class TelegramBotApi:
             permissions=permissions.json(),
             until_date=int(until_date.timestamp()),
         )
-        return result  # type: ignore
+        return result  # noqa, type: ignore
+
+    async def get_chat_administrators(
+        self,
+        chat_id: int,
+    ) -> List[Union[ChatMemberAdministrator, ChatMemberOwner]]:
+        results = await self._call_api(
+            "getChatAdministrators",
+            chat_id=chat_id,
+        )
+        admins = list()
+        for result in results:
+            status = result["status"]
+            if status == ChatMemberStatuses.CREATOR:
+                admins.append(ChatMemberOwner(**result))
+            if status == ChatMemberStatuses.ADMINISTRATOR:
+                admins.append(ChatMemberAdministrator(**result))
+        return admins

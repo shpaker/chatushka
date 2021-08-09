@@ -3,7 +3,7 @@ from typing import Union
 
 from pydantic import BaseModel
 
-from chatushka.samples.heroes.settings import HeroesSettings
+from chatushka.samples.matchers.heroes.settings import HeroesSettings
 from chatushka.utils import ServiceSettingsBase
 
 
@@ -26,10 +26,6 @@ class _Settings(ServiceSettingsBase):
     command_prefixes: Union[str, tuple[str, ...]] = ("/", "!")
     command_postfixes: Union[str, tuple[str, ...]] = "!"
     allow_raw_command: bool = True
-    admins: tuple[int, ...] = (
-        514026725,
-        147727588,
-    )
     mongodb: MongoDBSubSettings = MongoDBSubSettings()
     pagination: PaginationSubSettings = PaginationSubSettings()
     samples: SamplesSubSettings = SamplesSubSettings()

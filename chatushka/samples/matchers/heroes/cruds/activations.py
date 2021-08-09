@@ -1,8 +1,13 @@
 from typing import Optional
+
 from pymongo.results import InsertOneResult, UpdateResult
 
-from chatushka.samples.heroes.models import HeroesActivationModel, HeroesActivationMeta, HeroesActivationUpdatableModel
-from chatushka.samples.heroes.mongodb import get_activations_collection
+from chatushka.samples.matchers.heroes.models import (
+    HeroesActivationMeta,
+    HeroesActivationModel,
+    HeroesActivationUpdatableModel,
+)
+from chatushka.samples.matchers.heroes.mongodb import get_activations_collection
 from chatushka.transports.models import Chat, User
 
 

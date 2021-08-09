@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chatushka"
-version = "0.4.0"
+version = "0.5.0"
 description = "Bot that can make your chat explode!"
 authors = ["Aleksandr Shpak <shpaker@gmail.com>"]
 readme = "readme.md"
@@ -51,7 +51,7 @@ force_grid_wrap = 0
 use_parentheses = true
 ensure_newline_before_comments = true
 line_length = 120
-src_paths = ["twowires", "tests"]
+src_paths = ["chatushka", "tests"]
 skip = [".mypy_cache", ".pytest_cache", "venv"]
 
 [tool.pylint.messages_control]
@@ -61,7 +61,7 @@ extend-ignore = "E203,W503"
 [tool.pylint.format]
 max-line-length = "120"
 indent-string = "    "
-good-names = "i, x, y, T"
+good-names = "db, i, x, y, T"
 
 [tool.pylint.master]
 ignore = "venv,tests"

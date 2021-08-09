@@ -3,12 +3,16 @@ from typing import Union
 
 from pydantic import BaseModel
 
+from chatushka.samples.heroes.settings import HeroesSettings
 from chatushka.utils import ServiceSettingsBase
 
 
+class SamplesSubSettings(BaseModel):
+    heroes: HeroesSettings = HeroesSettings()
+
+
 class MongoDBSubSettings(BaseModel):
-    database: str = "meowrl"
-    homm_collection: str = "homm"
+    database: str = "chatushka"
 
 
 class PaginationSubSettings(BaseModel):
@@ -28,6 +32,7 @@ class _Settings(ServiceSettingsBase):
     )
     mongodb: MongoDBSubSettings = MongoDBSubSettings()
     pagination: PaginationSubSettings = PaginationSubSettings()
+    samples: SamplesSubSettings = SamplesSubSettings()
 
 
 @lru_cache

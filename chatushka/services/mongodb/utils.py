@@ -17,11 +17,6 @@ def get_database() -> AsyncIOMotorCollection:
     return client[settings.mongodb.database]
 
 
-def get_homm_collection() -> AsyncIOMotorCollection:
-    db = get_database()
-    return db[settings.mongodb.homm_collection]
-
-
 async def mongodb_paginated_find(
     collection: AsyncIOMotorClient,
     query: Optional[Dict[str, Any]],

@@ -23,12 +23,6 @@ class Chatushka(EventsMatcher):
         self.matchers = list(matchers) if matchers else list()
         self.add_handler(EventTypes.STARTUP, check_preconditions)
 
-    def add_matcher(
-        self,
-        matcher: MatcherProtocol,
-    ):
-        self.matchers.append(matcher)
-
     def add_matchers(
         self,
         *matchers: MatcherProtocol,

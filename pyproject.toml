@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chatushka"
-version = "0.3.1"
+version = "0.3.2"
 description = "Bot that can make your chat explode!"
 authors = ["Aleksandr Shpak <shpaker@gmail.com>"]
 readme = "readme.md"

@@ -1,10 +1,17 @@
-from random import randrange, choice
+from random import choice, randrange
 from typing import Optional
 
-from chatushka.samples.heroes.messages import (
-    REGULAR_WEEK_UNIT, REGULAR_WEEK_TEMPLATE, PLAYABLE_UNITS,
-    SPECIAL_WEEK_TEMPLATE, REGULAR_MONTH_UNIT, REGULAR_MONTH_MESSAGE, SPECIAL_MONTH_MESSAGE, PLAGUE_MONTH_MESSAGE,
+from chatushka.samples.matchers.heroes.messages import (
+    PLAGUE_MONTH_MESSAGE,
+    PLAYABLE_UNITS,
+    REGULAR_MONTH_MESSAGE,
+    REGULAR_MONTH_UNIT,
+    REGULAR_WEEK_TEMPLATE,
+    REGULAR_WEEK_UNIT,
+    SPECIAL_MONTH_MESSAGE,
+    SPECIAL_WEEK_TEMPLATE,
 )
+
 BOOL_TRUE_VALUES = ("+", "y", "yes", "true", "on")
 BOOL_FALSE_VALUES = ("-", "n", "no", "false", "off")
 

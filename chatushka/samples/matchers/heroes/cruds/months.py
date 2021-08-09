@@ -1,9 +1,9 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 
 from pymongo.results import InsertOneResult, UpdateResult
 
-from chatushka.samples.heroes.models import CalendarTypes, CalendarMonthModel
-from chatushka.samples.heroes.mongodb import get_calendar_collection
+from chatushka.samples.matchers.heroes.models import CalendarMonthModel, CalendarTypes
+from chatushka.samples.matchers.heroes.mongodb import get_calendar_collection
 
 
 async def create_month() -> CalendarMonthModel:
@@ -34,7 +34,7 @@ async def update_month() -> CalendarMonthModel:
             ),
             "$inc": dict(
                 number=1,
-            )
+            ),
         },
     )
     if res:

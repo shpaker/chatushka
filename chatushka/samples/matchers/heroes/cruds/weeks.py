@@ -2,8 +2,8 @@ from datetime import datetime, timezone
 
 from pymongo.results import InsertOneResult, UpdateResult
 
-from chatushka.samples.heroes.models import CalendarTypes, CalendarWeekModel
-from chatushka.samples.heroes.mongodb import get_calendar_collection
+from chatushka.samples.matchers.heroes.models import CalendarTypes, CalendarWeekModel
+from chatushka.samples.matchers.heroes.mongodb import get_calendar_collection
 
 
 async def create_week() -> CalendarWeekModel:
@@ -36,7 +36,7 @@ async def update_week() -> CalendarWeekModel:
             ),
             "$inc": dict(
                 number=1,
-            )
+            ),
         },
     )
     if res:

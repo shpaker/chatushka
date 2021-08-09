@@ -6,7 +6,7 @@ from chatushka.transports.telegram_bot_api import TelegramBotApi
 JOKES_URL = "https://jokesrv.rubedo.cloud/"
 
 
-async def joke(
+async def jokes_handler(
     api: TelegramBotApi,
     message: Message,
 ) -> None:

@@ -1,6 +1,10 @@
 from chatushka import Chatushka
 from chatushka.matchers import CommandsMatcher, RegexMatcher
-from chatushka.samples.heroes.handlers import activate_heroes_handler, heroes_week_handler, heroes_month_handler
+from chatushka.samples.matchers.heroes.handlers import (
+    activate_heroes_handler,
+    heroes_month_handler,
+    heroes_week_handler,
+)
 from chatushka.settings import get_settings
 
 settings = get_settings()

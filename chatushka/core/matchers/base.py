@@ -13,7 +13,11 @@ class MatcherBase(ABC):
 
     handlers: dict[Hashable, list[HANDLER_TYPING]]
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        description: str = "",
+    ) -> None:
+        self.description = description
         self.handlers = defaultdict(list)
 
     def __call__(

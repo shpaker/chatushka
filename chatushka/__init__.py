@@ -1,5 +1,3 @@
-from chatushka.bot import Chatushka
+from chatushka.core.bot import ChatushkaBot
 
-__all__ = (
-    "Chatushka",
-)
+__all__ = ("ChatushkaBot",)

@@ -1,9 +1,9 @@
 import signal
 from asyncio import ensure_future, get_event_loop, sleep
 from logging import getLogger
-from typing import Iterable, Optional
+from typing import Optional
 
-from chatushka.core.matchers import CommandsMatcher, EventsMatcher, EventTypes, MatcherProtocol
+from chatushka.core.matchers import EventsMatcher, EventTypes
 from chatushka.core.transports.telegram_bot_api import TelegramBotApi
 from chatushka.core.transports.utils import check_preconditions
 
@@ -14,26 +14,12 @@ class ChatushkaBot(EventsMatcher):
     def __init__(
         self,
         token: str,
-        matchers: Iterable[MatcherProtocol] = None,
         debug: bool = False,
     ) -> None:
         super().__init__()
         self.debug = debug
         self.api = TelegramBotApi(token)
-        self.matchers = list(matchers) if matchers else list()
         self.add_handler(EventTypes.STARTUP, check_preconditions)
-        self.commands = CommandsMatcher()
-        self.commands.add_handler(("help", "man"), self.help_message_handler)
-
-    def help_message_handler(self):
-        # for matcher in ma
-        pass
-
-    def add_matchers(
-        self,
-        *matchers: MatcherProtocol,
-    ):
-        self.matchers += matchers
 
     async def _loop(self) -> None:
         offset: Optional[int] = None
@@ -42,7 +28,6 @@ class ChatushkaBot(EventsMatcher):
             if updates:
                 for update in updates:
                     try:
-                        await self.commands.match(self.api, update.message)
                         for matcher in self.matchers:
                             await matcher.match(self.api, update.message)
                     except Exception as err:  # noqa, pylint: disable=broad-except

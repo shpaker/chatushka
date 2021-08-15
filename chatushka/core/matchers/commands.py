@@ -13,10 +13,9 @@ class CommandsMatcher(MatcherBase):
         allow_raw: bool = False,
         case_sensitive: bool = False,
         whitelist: Optional[tuple[int, ...]] = None,
-        description: str = "",
     ) -> None:
 
-        super().__init__(description)
+        super().__init__()
         if isinstance(prefixes, str):
             prefixes = (prefixes,)
         if isinstance(postfixes, str):

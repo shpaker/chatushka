@@ -5,6 +5,7 @@ from inspect import signature
 from typing import Any, Callable, Hashable, Iterable, Optional, Union
 
 from chatushka.core.models import HANDLER_TYPING, MatchedToken
+from chatushka.core.protocols import MatcherProtocol
 from chatushka.core.transports.models import Message
 from chatushka.core.transports.telegram_bot_api import TelegramBotApi
 
@@ -13,12 +14,9 @@ class MatcherBase(ABC):
 
     handlers: dict[Hashable, list[HANDLER_TYPING]]
 
-    def __init__(
-        self,
-        description: str = "",
-    ) -> None:
-        self.description = description
+    def __init__(self) -> None:
         self.handlers = defaultdict(list)
+        self.matchers: list[MatcherProtocol] = list()
 
     def __call__(
         self,
@@ -47,21 +45,30 @@ class MatcherBase(ABC):
             for token in prepared:
                 self.handlers[token].append(handler)
 
+    def add_matcher(
+        self,
+        *matchers: MatcherProtocol,
+    ):
+        self.matchers += matchers
+
     async def match(
         self,
         api: TelegramBotApi,
         message: Message,
-    ) -> Optional[MatchedToken]:
+    ) -> list[MatchedToken]:
+        matched_handlers = list()
         for token in self.handlers.keys():
             if matched := await self._check(token, message):
+                matched_handlers.append(matched)
                 await self.call(
                     api=api,
                     token=matched.token,
                     message=message,
                     kwargs=matched.kwargs | dict(args=matched.args),
                 )
-                return matched
-        return
+        for matcher in self.matchers:
+            matched_handlers += await matcher.match(api, message)
+        return matched_handlers
 
     async def call(
         self,
@@ -89,7 +96,7 @@ class MatcherBase(ABC):
         self,
         token: Hashable,
     ) -> Union[Any, Iterable[Any]]:
-        return (token,)
+        return (token,)  # noqa
 
     # pylint: disable=unused-argument
     async def _check(

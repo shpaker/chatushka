@@ -5,6 +5,10 @@ from chatushka.core.matchers import CommandsMatcher, RegexMatcher
 from chatushka.core.transports.models import Message
 from chatushka.core.transports.telegram_bot_api import TelegramBotApi
 
+HELP_MESSAGE = (
+    'Just think of a question that can be answered "Yes" or "No", concentrate very, very hard, and type command!'
+)
+
 EIGHT_BALL_EN = (
     "It is certain",
     "It is decidedly so",
@@ -59,7 +63,7 @@ question_matcher = RegexMatcher()
 eight_ball_matcher.add_matcher(question_matcher)
 
 
-@eight_ball_matcher("8ball", "ball8", "b8", "8b")
+@eight_ball_matcher("8ball", "ball8", "b8", "8b", help_message=HELP_MESSAGE)
 async def eight_ball_handler(
     api: TelegramBotApi,
     message: Message,

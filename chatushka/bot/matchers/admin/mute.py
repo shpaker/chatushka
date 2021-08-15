@@ -14,7 +14,7 @@ mute_matcher = CommandsMatcher(
 )
 
 
-@mute_matcher("mute")
+@mute_matcher("mute", "shutup")
 async def mute_handler(
     api: TelegramBotApi,
     message: Message,

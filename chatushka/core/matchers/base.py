@@ -73,19 +73,22 @@ class MatcherBase(ABC):
         self,
         api: TelegramBotApi,
         message: Message,
+        *,
+        should_call_matched: bool = False,
     ) -> list[MatchedToken]:
         matched_handlers = list()
         for token in self.handlers.keys():
             if matched := await self._check(token, message):
                 matched_handlers.append(matched)
-                await self.call(
-                    api=api,
-                    token=matched.token,
-                    message=message,
-                    kwargs=matched.kwargs | dict(args=matched.args),
-                )
+                if should_call_matched:
+                    await self.call(
+                        api=api,
+                        token=matched.token,
+                        message=message,
+                        kwargs=matched.kwargs | dict(args=matched.args),
+                    )
         for matcher in self.matchers:
-            matched_handlers += await matcher.match(api, message)
+            matched_handlers += await matcher.match(api, message, should_call_matched=should_call_matched)
         return matched_handlers
 
     async def call(

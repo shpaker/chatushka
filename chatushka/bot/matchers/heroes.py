@@ -9,18 +9,15 @@ from chatushka.core.transports.telegram_bot_api import TelegramBotApi
 
 MESSAGE_TITLE = "✨💫 <b>ГЕРОЙСКИЙ КАЛЕНДАРЬ</b> 💫✨"
 settings = get_settings()
-heroes_commands_matcher = CommandsMatcher(
+heroes_matcher = CommandsMatcher(
     prefixes=settings.command_prefixes,
     postfixes=settings.command_postfixes,
 )
-heroes_regex_matcher = RegexMatcher()
-heroes_matchers = (
-    heroes_commands_matcher,
-    heroes_regex_matcher,
-)
+regex_matcher = RegexMatcher()
+heroes_matcher.add_matcher(regex_matcher)
 
 
-@heroes_commands_matcher("homm", "heroes")
+@heroes_matcher("homm", "heroes")
 async def activate_heroes_handler(
     api: TelegramBotApi,
     message: Message,
@@ -61,7 +58,7 @@ async def activate_heroes_handler(
     )
 
 
-@heroes_regex_matcher("2 4 1 * *")
+@regex_matcher("2 4 1 * *")
 async def heroes_month_handler(
     api: TelegramBotApi,
 ) -> None:
@@ -77,7 +74,7 @@ async def heroes_month_handler(
             continue
 
 
-@heroes_regex_matcher("0 8 * * mon")
+@regex_matcher("0 8 * * mon")
 async def heroes_week_handler(
     api: TelegramBotApi,
 ) -> None:

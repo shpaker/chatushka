@@ -2,35 +2,53 @@ from abc import ABC
 from asyncio import iscoroutinefunction
 from collections import defaultdict
 from inspect import signature
-from typing import Any, Callable, Hashable, Iterable, Optional, Union
+from typing import Any, Callable, Hashable, Iterable, NamedTuple, Optional, Union
 
 from chatushka.core.models import HANDLER_TYPING, MatchedToken
+from chatushka.core.protocols import MatcherProtocol
 from chatushka.core.transports.models import Message
 from chatushka.core.transports.telegram_bot_api import TelegramBotApi
 
 
+class HelpMessage(NamedTuple):
+    tokens: tuple[str]
+    message: Optional[str]
+
+
 class MatcherBase(ABC):
-
-    handlers: dict[Hashable, list[HANDLER_TYPING]]
-
     def __init__(self) -> None:
-        self.handlers = defaultdict(list)
+        self.handlers: dict[Hashable, list[HANDLER_TYPING]] = defaultdict(list)
+        self.matchers: list[MatcherProtocol] = list()
+        self.help_messages: list[HelpMessage] = list()
 
     def __call__(
         self,
         *tokens: Hashable,
+        help_message: Optional[str] = None,
     ) -> Callable[[Callable[[], None]], None]:
         def decorator(
             func: HANDLER_TYPING,
         ) -> None:
-            self.add_handler(tokens=tokens, handler=func)
+            self.add_handler(
+                tokens=tokens,
+                handler=func,
+                help_message=help_message,
+            )
 
         return decorator
+
+    def make_help_message(self):
+        messages = self.help_messages
+        for matcher in self.matchers:
+            messages += matcher.make_help_message()
+        return messages
 
     def add_handler(
         self,
         tokens: Union[Hashable, Iterable[Hashable]],
         handler: HANDLER_TYPING,
+        help_message: Optional[str] = None,
+        include_in_help: bool = True,
     ) -> None:
         if not isinstance(tokens, (list, tuple, set)):
             tokens = (tokens,)
@@ -42,22 +60,36 @@ class MatcherBase(ABC):
                 prepared = (prepared,)
             for token in prepared:
                 self.handlers[token].append(handler)
+        if include_in_help:
+            self.help_messages.append(HelpMessage(tokens, help_message))
+
+    def add_matcher(
+        self,
+        *matchers: MatcherProtocol,
+    ):
+        self.matchers += matchers
 
     async def match(
         self,
         api: TelegramBotApi,
         message: Message,
-    ) -> Optional[MatchedToken]:
+        *,
+        should_call_matched: bool = False,
+    ) -> list[MatchedToken]:
+        matched_handlers = list()
         for token in self.handlers.keys():
             if matched := await self._check(token, message):
-                await self.call(
-                    api=api,
-                    token=matched.token,
-                    message=message,
-                    kwargs=matched.kwargs | dict(args=matched.args),
-                )
-                return matched
-        return
+                matched_handlers.append(matched)
+                if should_call_matched:
+                    await self.call(
+                        api=api,
+                        token=matched.token,
+                        message=message,
+                        kwargs=matched.kwargs | dict(args=matched.args),
+                    )
+        for matcher in self.matchers:
+            matched_handlers += await matcher.match(api, message, should_call_matched=should_call_matched)
+        return matched_handlers
 
     async def call(
         self,
@@ -85,7 +117,7 @@ class MatcherBase(ABC):
         self,
         token: Hashable,
     ) -> Union[Any, Iterable[Any]]:
-        return (token,)
+        return (token,)  # noqa
 
     # pylint: disable=unused-argument
     async def _check(

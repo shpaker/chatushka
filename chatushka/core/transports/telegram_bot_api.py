@@ -144,3 +144,39 @@ class TelegramBotApi:
             if status == ChatMemberStatuses.ADMINISTRATOR:
                 admins.append(ChatMemberAdministrator(**result))
         return admins
+
+    async def pin_chat_message(
+        self,
+        chat_id: int,
+        message_id: int,
+        disable_notification: bool = True,
+    ) -> bool:
+        result = await self._call_api(
+            "pinChatMessage",
+            chat_id=chat_id,
+            message_id=message_id,
+            disable_notification=disable_notification,
+        )
+        return result  # noqa, type: ignore
+
+    async def unpin_chat_message(
+        self,
+        chat_id: int,
+        message_id: int,
+    ) -> bool:
+        result = await self._call_api(
+            "unpinChatMessage",
+            chat_id=chat_id,
+            message_id=message_id,
+        )
+        return result  # noqa, type: ignore
+
+    async def unpin_all_chat_messages(
+        self,
+        chat_id: int,
+    ) -> bool:
+        result = await self._call_api(
+            "unpinAllChatMessages",
+            chat_id=chat_id,
+        )
+        return result  # noqa, type: ignore

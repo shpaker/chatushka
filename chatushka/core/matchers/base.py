@@ -67,7 +67,7 @@ class MatcherBase(ABC):
         kwargs: Optional[dict[str, Any]] = None,
     ) -> None:
         if not kwargs:
-            kwargs = dict()
+            kwargs = {}
         kwargs = kwargs | dict(api=api, message=message, token=token)
         handlers = self.handlers.get(token)
         if not handlers:

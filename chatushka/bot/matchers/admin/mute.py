@@ -3,7 +3,8 @@ from enum import Enum
 from random import choice, randrange
 from typing import Optional
 
-from chatushka.bot.matchers.admin._matcher import admin_matcher
+from chatushka.bot.settings import get_settings
+from chatushka.core.matchers import CommandsMatcher
 from chatushka.core.transports.models import ChatPermissions, Message, User
 from chatushka.core.transports.telegram_bot_api import TelegramBotApi
 
@@ -12,6 +13,12 @@ RESTRICT_PERMISSION = ChatPermissions(
     can_send_media_messages=False,
     can_send_polls=False,
     can_send_other_messages=False,
+)
+
+settings = get_settings()
+admin_matcher = CommandsMatcher(
+    prefixes=settings.command_prefixes,
+    postfixes=settings.command_postfixes,
 )
 
 
@@ -28,7 +35,7 @@ class MuteMessages(Enum):
     )
 
 
-@admin_matcher()
+@admin_matcher("mute")
 async def mute_handler(
     api: TelegramBotApi,
     message: Message,

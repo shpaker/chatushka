@@ -4,9 +4,9 @@ from logging import DEBUG, INFO, WARNING, basicConfig, getLogger
 from click import command, option
 
 from chatushka import ChatushkaBot
-from chatushka.bot.matchers import eight_ball_matchers, helpers_matcher, heroes_matchers, jokes_matcher, suicide_matcher
+from chatushka.bot.matchers import eight_ball_matchers, helpers_matcher, jokes_matcher, suicide_matcher
+from chatushka.bot.matchers.admin.mute import admin_matcher
 from chatushka.bot.settings import get_settings
-from chatushka.core.services.mongodb.wrapper import MongoDBWrapper
 
 logger = getLogger()
 settings = get_settings()
@@ -17,15 +17,13 @@ def make_bot(
     debug: bool,
 ) -> ChatushkaBot:
     instance = ChatushkaBot(token=token, debug=debug)
-    wrapper = MongoDBWrapper()
-    wrapper.add_event_handlers(instance)
 
     instance.add_matchers(
         jokes_matcher,
         *eight_ball_matchers,
         helpers_matcher,
-        *heroes_matchers,
         suicide_matcher,
+        admin_matcher,
     )
 
     instance.add_matchers()

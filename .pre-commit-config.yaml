@@ -31,7 +31,7 @@ repos:
 #        name: mypy
 #        entry: mypy
 #        language: system
-#        files: ^(twowires|tests)/.+\.py$
+#        files: ^(chatushka|tests)/.+\.py$
   -
     repo: https://github.com/pre-commit/pre-commit-hooks
     rev: "v3.4.0"

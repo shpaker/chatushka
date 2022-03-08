@@ -26,7 +26,7 @@ class ChatushkaBot(EventsMatcher):
     def add_matchers(
         self,
         *matchers: MatcherProtocol,
-    ):
+    ) -> None:
         self.matchers += matchers
 
     async def _loop(self) -> None:

@@ -19,7 +19,6 @@ class MongoDBSubSettings(BaseModel):
 class _Settings(ServiceSettingsBase):
     command_prefixes: Union[str, tuple[str, ...]] = ("/", "!")
     command_postfixes: Union[str, tuple[str, ...]] = "!"
-    mongodb: MongoDBSubSettings = MongoDBSubSettings()
 
 
 @lru_cache

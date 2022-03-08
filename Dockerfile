@@ -1,4 +1,3 @@
-
 FROM python:3.9-slim as base-image
 ARG POETRY_VERSION=1.1.7
 WORKDIR /service

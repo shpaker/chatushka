@@ -74,7 +74,7 @@ class TelegramBotApi:
         timeout: int,
         offset: Optional[int] = None,
     ) -> Tuple[List[models.Update], int]:
-        params = dict()
+        params = {}
         if offset:
             params["offset"] = offset
         results = await self._call_api(

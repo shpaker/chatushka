@@ -37,7 +37,7 @@ async def pin_handler(
     if pin_hours:
         await api.send_message(
             chat_id=message.chat.id,
-            text="Через {} часа закреп будет убран",
+            text=f"Через {pin_hours} ч. закреп будет убран",
             reply_to_message_id=message.message_id,
         )
         await sleep(pin_hours * 60)

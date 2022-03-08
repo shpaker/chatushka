@@ -1,7 +1,7 @@
 from datetime import timedelta
 from random import randrange
 
-from chatushka.bot.libs.mute import send_mute_request
+from chatushka.bot.internal.mute import send_mute_request
 from chatushka.bot.settings import get_settings
 from chatushka.core.matchers import CommandsMatcher
 from chatushka.core.transports.models import Message

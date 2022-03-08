@@ -23,7 +23,6 @@ def make_bot(
         helpers_matcher,
         suicide_matcher,
     )
-    # msg = instance.make_help_message()
     return instance
 
 

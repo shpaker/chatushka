@@ -32,7 +32,7 @@ async def eight_ball_handler(
     )
 
 
-@question_matcher(r"\?")
+@question_matcher(r"\?", include_in_help=False)
 async def eight_ball_answer_handler(
     api: TelegramBotApi,
     message: Message,

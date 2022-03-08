@@ -35,7 +35,7 @@ class CommandsMatcher(MatcherBase):
         self,
         token: Hashable,
     ) -> Union[Hashable, Iterable[Hashable]]:
-        tokens = list()
+        tokens = []
         for variation in self._variations:
             value = variation.format(cmd=token)
             if not self._case_sensitive:

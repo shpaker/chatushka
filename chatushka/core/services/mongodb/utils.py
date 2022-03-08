@@ -1,20 +1,17 @@
 from typing import Any, Dict, List, Optional, Tuple
 
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection
+from motor.motor_asyncio import AsyncIOMotorClient
 
-from chatushka.bot.settings import get_settings
 from chatushka.core.services.mongodb.wrapper import MongoDBWrapper
-
-settings = get_settings()
 
 
 def get_mongodb_client() -> AsyncIOMotorClient:
     return MongoDBWrapper().client
 
 
-def get_database() -> AsyncIOMotorCollection:
-    client = get_mongodb_client()
-    return client[settings.mongodb.database]
+# def get_database() -> AsyncIOMotorCollection:
+#     client = get_mongodb_client()
+#     return client[settings.mongodb.database]
 
 
 async def mongodb_paginated_find(

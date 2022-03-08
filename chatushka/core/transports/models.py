@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 class ChatType(str, Enum):
     GROUP = "group"
     SUPERGROUP = "supergroup"
+    PRIVATE = "private"
 
 
 class ChatMemberStatuses(str, Enum):

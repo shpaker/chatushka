@@ -532,7 +532,7 @@ tzdata = {version = "*", markers = "python_version >= \"3.6\""}
 name = "pyyaml"
 version = "6.0"
 description = "YAML parser and emitter for Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -656,7 +656,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "96da055fa240bf4bd44a5c7014b9a87272402526bdaae97da6c66aa5532e418d"
+content-hash = "4e785d2c0777a1a2288280fe4a33a127e3f582239671d44a9229ec49961852c7"
 
 [metadata.files]
 aiocron = [

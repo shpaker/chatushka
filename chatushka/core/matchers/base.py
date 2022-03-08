@@ -16,15 +16,18 @@ class HelpMessage(NamedTuple):
 
 
 class MatcherBase(ABC):
-    def __init__(self) -> None:
+    def __init__(
+        self,
+    ) -> None:
         self.handlers: dict[Hashable, list[HANDLER_TYPING]] = defaultdict(list)
-        self.matchers: list[MatcherProtocol] = list()
-        self.help_messages: list[HelpMessage] = list()
+        self.matchers: list[MatcherProtocol] = []
+        self._help_messages: list[HelpMessage] = []
 
     def __call__(
         self,
         *tokens: Hashable,
         help_message: Optional[str] = None,
+        include_in_help: bool = True,
     ) -> Callable[[Callable[[], None]], None]:
         def decorator(
             func: HANDLER_TYPING,
@@ -33,14 +36,16 @@ class MatcherBase(ABC):
                 tokens=tokens,
                 handler=func,
                 help_message=help_message,
+                include_in_help=include_in_help,
             )
 
         return decorator
 
-    def make_help_message(self):
-        messages = self.help_messages
+    @property
+    def help_messages(self):
+        messages = self._help_messages.copy()
         for matcher in self.matchers:
-            messages += matcher.make_help_message()
+            messages += matcher.help_messages
         return messages
 
     def add_handler(
@@ -50,6 +55,8 @@ class MatcherBase(ABC):
         help_message: Optional[str] = None,
         include_in_help: bool = True,
     ) -> None:
+        if not help_message:
+            help_message = f"help message of {self.__class__.__name__}"
         if not isinstance(tokens, (list, tuple, set)):
             tokens = (tokens,)
         for raw_token in tokens:
@@ -61,12 +68,14 @@ class MatcherBase(ABC):
             for token in prepared:
                 self.handlers[token].append(handler)
         if include_in_help:
-            self.help_messages.append(HelpMessage(tokens, help_message))
+            self._help_messages.append(
+                HelpMessage(tokens, help_message),
+            )
 
     def add_matcher(
         self,
         *matchers: MatcherProtocol,
-    ):
+    ) -> None:
         self.matchers += matchers
 
     async def match(
@@ -76,7 +85,7 @@ class MatcherBase(ABC):
         *,
         should_call_matched: bool = False,
     ) -> list[MatchedToken]:
-        matched_handlers = list()
+        matched_handlers = []
         for token in self.handlers.keys():
             if matched := await self._check(token, message):
                 matched_handlers.append(matched)
@@ -99,7 +108,7 @@ class MatcherBase(ABC):
         kwargs: Optional[dict[str, Any]] = None,
     ) -> None:
         if not kwargs:
-            kwargs = dict()
+            kwargs = {}
         kwargs = kwargs | dict(api=api, message=message, token=token)
         handlers = self.handlers.get(token)
         if not handlers:

@@ -15,7 +15,7 @@ class RegexMatchKwargs(TypedDict):
 class MatchedToken(NamedTuple):
     token: Hashable
     args: tuple[str, ...] = ()
-    kwargs: dict[str, Any] = dict()
+    kwargs: dict[str, Any] = {}
 
 
 @unique

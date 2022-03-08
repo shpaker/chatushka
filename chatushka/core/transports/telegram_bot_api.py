@@ -11,12 +11,6 @@ from chatushka.core.transports.models import (
     ChatMemberOwner,
     ChatMemberStatuses,
     ChatPermissions,
-    ChatType,
-)
-
-ALLOWED_CHAT_TYPES_FOR_UPDATES = (
-    ChatType.GROUP,
-    ChatType.SUPERGROUP,
 )
 
 logger = getLogger()
@@ -74,7 +68,7 @@ class TelegramBotApi:
         timeout: int,
         offset: Optional[int] = None,
     ) -> Tuple[List[models.Update], int]:
-        params = dict()
+        params = {}
         if offset:
             params["offset"] = offset
         results = await self._call_api(
@@ -82,7 +76,7 @@ class TelegramBotApi:
             timeout=timeout,
             **params,
         )
-        updates_list = list()
+        updates_list = []
         latest_update_id: Optional[int] = offset
         for result in results:
             if not latest_update_id or (latest_update_id < result["update_id"]):  # type: ignore
@@ -136,7 +130,7 @@ class TelegramBotApi:
             "getChatAdministrators",
             chat_id=chat_id,
         )
-        admins = list()
+        admins = []
         for result in results:
             status = result["status"]
             if status == ChatMemberStatuses.CREATOR:

@@ -1,26 +1,59 @@
 import signal
 from asyncio import ensure_future, get_event_loop, sleep
+from functools import partial
 from logging import getLogger
 from typing import Optional
 
-from chatushka.core.matchers import EventsMatcher, EventTypes
+from chatushka.core.matchers import CommandsMatcher, EventsMatcher, EventTypes
 from chatushka.core.models import MatchedToken
+from chatushka.core.transports.models import Message
 from chatushka.core.transports.telegram_bot_api import TelegramBotApi
 from chatushka.core.transports.utils import check_preconditions
 
 logger = getLogger(__name__)
 
 
+async def _message_handler(
+    bot_instance: "ChatushkaBot",
+    message: Message,
+    api: TelegramBotApi,
+) -> None:
+    await api.send_message(
+        chat_id=message.chat.id,
+        text=bot_instance.help_message_text,
+        reply_to_message_id=message.message_id,
+        parse_mode="markdown",
+    )
+
+
 class ChatushkaBot(EventsMatcher):
     def __init__(
         self,
         token: str,
+        title: str = None,
         debug: bool = False,
     ) -> None:
         super().__init__()
+
+        self.title = title or self.__class__.__name__
         self.debug = debug
         self.api = TelegramBotApi(token)
-        self.add_handler(EventTypes.STARTUP, check_preconditions)
+        self.add_handler(EventTypes.STARTUP, check_preconditions, include_in_help=False)
+
+        bot_commands_matcher = CommandsMatcher(prefixes="/")
+        bot_commands_matcher.add_handler(
+            ("start", "help"),
+            partial(_message_handler, self),
+            help_message="This message!",
+        )
+        self.add_matcher(bot_commands_matcher)
+
+    @property
+    def help_message_text(self):
+        output = "*CHATUSHKA BOT*"
+        for help_message in self.help_messages:
+            output += f"\n\n*{', '.join(help_message.tokens)}*\n> {help_message.message}"
+        return output
 
     # pylint: disable=too-many-nested-blocks
     async def _loop(self) -> None:

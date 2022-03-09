@@ -4,7 +4,7 @@ from functools import partial
 from logging import getLogger
 from typing import Optional
 
-from chatushka.__version__ import __VERSION__
+from chatushka.__version__ import __URL__, __VERSION__
 from chatushka.core.matchers import CommandsMatcher, EventsMatcher, EventTypes
 from chatushka.core.models import MatchedToken
 from chatushka.core.transports.models import Message
@@ -51,7 +51,7 @@ class ChatushkaBot(EventsMatcher):
 
     @property
     def help_message_text(self):
-        output = f"*CHATUSHKA BOT {__VERSION__}*"
+        output = f"*CHATUSHKA BOT {__VERSION__}*\n_powered by ${__URL__}_"
         for help_message in self.help_messages:
             output += f"\n\n*{', '.join(help_message.tokens)}*\n> {help_message.message}"
         return output

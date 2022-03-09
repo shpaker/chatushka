@@ -29,7 +29,7 @@ jobs:
       -
         name: Set package meta-data
         shell: bash
-        run: sed -i 's,$__VERSION__,${{ steps.extract_name_and_version.outputs.ver }},g' pyproject.toml
+        run: sed -i 's,$__VERSION__,0.0.0,g' pyproject.toml
       -
         name: dependencies
         run: |

@@ -35,17 +35,11 @@ jobs:
           export VERSION_PY_PATH=$(basename ${GITHUB_REPOSITORY})/__version__.py
           export REPO_URL=${GITHUB_SERVER_URL}/${{ github.repository }}
 
-          echo ${VERSION_PY_PATH}
-          echo ${REPO_URL}
+          sed -i 's,$__VERSION__,${{ steps.extract_name_and_version.outputs.ver }},g' pyproject.toml
+          sed -i 's,$__VERSION__,${{ steps.extract_name_and_version.outputs.ver }},g' ${VERSION_PY_PATH}
 
-          sed -i 's/$__VERSION__/'${{ steps.extract_name_and_version.outputs.ver }}'/g' pyproject.toml
-          sed -i 's/$__VERSION__/'${{ steps.extract_name_and_version.outputs.ver }}'/g' ${VERSION_PY_PATH}
-
-          cat pyproject.toml
-          cat ${VERSION_PY_PATH}
-
-          sed -i 's/$__URL__/'${REPO_URL}'/g' pyproject.toml
-          sed -i 's/$__URL__/'${REPO_URL}'/g' ${VERSION_PY_PATH}
+          sed -i 's,$__URL__,${REPO_URL},g' pyproject.toml
+          sed -i 's,$__URL__,${REPO_URL},g' ${VERSION_PY_PATH}
 
           cat pyproject.toml
           cat ${VERSION_PY_PATH}

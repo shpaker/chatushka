@@ -37,10 +37,13 @@ jobs:
           echo ${VERSION_PY_PATH}
           echo ${REPO_URL}
           sed -i 's/$__VERSION__/'${{ steps.extract_name_and_version.outputs.ver }}'/g' pyproject.toml
+          cat pyproject.toml
           sed -i 's/$__VERSION__/'${{ steps.extract_name_and_version.outputs.ver }}'/g' ${VERSION_PY_PATH}
+          cat ${VERSION_PY_PATH}
           sed -i 's/$__URL__/'${REPO_URL}'/g' pyproject.toml
+          cat pyproject.toml
           sed -i 's/$__URL__/'${REPO_URL}'/g' ${VERSION_PY_PATH}
-          cat $(basename ${GITHUB_REPOSITORY})/__version__
+          cat ${VERSION_PY_PATH}
       -
         name: Dependencies
         run: |

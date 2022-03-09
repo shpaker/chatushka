@@ -4,7 +4,14 @@ from logging import DEBUG, INFO, WARNING, basicConfig, getLogger
 from click import command, option
 
 from chatushka import ChatushkaBot
-from chatushka.bot.matchers import admin_matcher, eight_ball_matcher, helpers_matcher, jokes_matcher, suicide_matcher
+from chatushka.bot.matchers import (
+    admin_matcher,
+    eight_ball_matcher,
+    helpers_matcher,
+    jokes_matcher,
+    lukashenko_matcher,
+    suicide_matcher,
+)
 from chatushka.bot.settings import get_settings
 
 logger = getLogger()
@@ -22,6 +29,7 @@ def make_bot(
         eight_ball_matcher,
         helpers_matcher,
         suicide_matcher,
+        lukashenko_matcher,
     )
     return instance
 

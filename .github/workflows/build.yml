@@ -113,7 +113,6 @@ jobs:
           labels:
             "org.opencontainers.image.source=${GITHUB_SERVER_URL}/${{ github.repository }}"
           build-args: |
-            SHORTENER_VERSION=${{ steps.extract_name_and_version.outputs.ver }}
             CHATUSHKA_VERSION=${{ steps.extract_name_and_version.outputs.ver }}
           cache-from: type=registry,ref=${{ env.REGISTRY_HOST }}/${{ github.repository }}:${{ steps.extract_name_and_version.outputs.minor_ver }}
           cache-to: type=inline

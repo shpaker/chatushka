@@ -25,6 +25,15 @@ jobs:
           echo "##[set-output name=sha;]$(git rev-parse --short "$GITHUB_SHA")"
         id: extract_name_and_version
       -
+        name: Set package meta-data
+        shell: bash
+        run: |
+          sed -i 's/%__VERSION__/'${{ steps.extract_name_and_version.outputs.ver }}'/g' pyproject.toml
+          sed -i 's/%__URL__/'${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}'/g' pyproject.toml
+          sed -i 's/%__VERSION__/'${{ steps.extract_name_and_version.outputs.ver }}'/g' $(basename ${GITHUB_REPOSITORY})/__version__.py
+          sed -i 's/%__URL__/'${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}'/g' $(basename ${GITHUB_REPOSITORY})/__version__.py
+          cat $(basename ${GITHUB_REPOSITORY})/__version__
+      -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       -
@@ -37,15 +46,6 @@ jobs:
           registry: ${{ env.REGISTRY_HOST }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      -
-        name: Set package meta-data
-        shell: bash
-        run: |
-          sed -i 's/%__VERSION__/'${{ steps.extract_name_and_version.outputs.ver }}'/g' pyproject.toml
-          sed -i 's/%__URL__/'${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}'/g' pyproject.toml
-          sed -i 's/%__VERSION__/'${{ steps.extract_name_and_version.outputs.ver }}'/g' $(basename ${GITHUB_REPOSITORY})/__version__.py
-          sed -i 's/%__URL__/'${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}'/g' $(basename ${GITHUB_REPOSITORY})/__version__.py
-          cat $(basename ${GITHUB_REPOSITORY})/__version__
       -
         name: Build and push
         uses: docker/build-push-action@v2

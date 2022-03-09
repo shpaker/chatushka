@@ -33,7 +33,7 @@ jobs:
         shell: bash
         run: |
           export VERSION_PY_PATH=$(basename ${GITHUB_REPOSITORY})/__version__.py
-          export REPO_URL=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}
+          export REPO_URL=${GITHUB_SERVER_URL}/${{ github.repository }}
           echo ${VERSION_PY_PATH}
           echo ${REPO_URL}
           sed -i 's/$__VERSION__/'${{ steps.extract_name_and_version.outputs.ver }}'/g' pyproject.toml

@@ -29,9 +29,7 @@ jobs:
       -
         name: Set package meta-data
         shell: bash
-        run: |
-          export VERSION_PY_PATH=$(basename ${GITHUB_REPOSITORY})/__version__.py
-          sed -i 's,$__VERSION__,${{ steps.extract_name_and_version.outputs.ver }},g' ${VERSION_PY_PATH}
+        run: sed -i 's,$__VERSION__,${{ steps.extract_name_and_version.outputs.ver }},g' pyproject.toml
       -
         name: dependencies
         run: |

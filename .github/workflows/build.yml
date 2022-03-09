@@ -31,11 +31,14 @@ jobs:
       -
         name: Set package meta-data
         shell: bash
+        env:
+          VERSION_PY_PATH: $(basename ${GITHUB_REPOSITORY})/__version__.py
+          REPO_URL: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}
         run: |
-          sed -i 's/$__VERSION__/${{ steps.extract_name_and_version.outputs.ver }}/g' pyproject.toml
-          sed -i 's/$__URL__/${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/g' pyproject.toml
-          sed -i 's/$__VERSION__/${{ steps.extract_name_and_version.outputs.ver }}/g' $(basename ${GITHUB_REPOSITORY})/__version__.py
-          sed -i 's/$__URL__/${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/g' $(basename ${GITHUB_REPOSITORY})/__version__.py
+          sed -i 's/$__VERSION__/'${{ steps.extract_name_and_version.outputs.ver }}'/g' pyproject.toml
+          sed -i 's/$__VERSION__/'${{ steps.extract_name_and_version.outputs.ver }}'/g' ${VERSION_PY_PATH}
+          sed -i 's/$__URL__/'${REPO_URL}'/g' pyproject.toml
+          sed -i 's/$__URL__/'${REPO_URL}'/g' ${VERSION_PY_PATH}
           cat $(basename ${GITHUB_REPOSITORY})/__version__
       -
         name: Dependencies

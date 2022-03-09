@@ -6,6 +6,9 @@ on:
     branches:
       - main
 
+env:
+  POETRY_VERSION: "1.1.13"
+
 jobs:
 
   lint:
@@ -24,9 +27,13 @@ jobs:
       -
         uses: actions/checkout@v2
       -
+        name: Set package meta-data
+        shell: bash
+        run: sed -i 's,$__VERSION__,0.0.0,g' pyproject.toml
+      -
         name: dependencies
         run: |
-          python -m pip install poetry==1.1.7
+          python -m pip install poetry==${POETRY_VERSION}
           poetry install
       -
         name: install hooks

@@ -28,5 +28,6 @@ jobs:
       -
         name: publish
         run: |
+          sed -i 's/__NAME__/'${CI_PROJECT_TITLE}'/g' ${HELM_CHART_PATH}
           poetry config http-basic.pypi ${{ secrets.PYPI_LOGIN }} ${{ secrets.PYPI_PASS }}
           poetry publish

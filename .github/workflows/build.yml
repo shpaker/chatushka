@@ -1,8 +1,9 @@
 name: Build
 
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - '*'
 
 jobs:
   build:
@@ -37,6 +38,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       -
+        name: Set package meta-data
+        shell: bash
+        run: |
+          sed -i 's/%__VERSION__/'${{ steps.extract_name_and_version.outputs.ver }}'/g' pyproject.toml
+          sed -i 's/%__URL__/'${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}'/g' pyproject.toml
+          sed -i 's/%__VERSION__/'${{ steps.extract_name_and_version.outputs.ver }}'/g' $(basename ${GITHUB_REPOSITORY})/__version__.py
+          sed -i 's/%__URL__/'${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}'/g' $(basename ${GITHUB_REPOSITORY})/__version__.py
+          cat $(basename ${GITHUB_REPOSITORY})/__version__
+      -
         name: Build and push
         uses: docker/build-push-action@v2
         with:
@@ -50,7 +60,7 @@ jobs:
             "${{ env.REGISTRY_HOST }}/${{ github.repository }}:${{ steps.extract_name_and_version.outputs.minor_ver }}"
             "${{ env.REGISTRY_HOST }}/${{ github.repository }}:${{ steps.extract_name_and_version.outputs.ver }}"
           labels:
-            "org.opencontainers.image.source=https://github.com/${{ github.repository }}"
+            "org.opencontainers.image.source=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}"
           build-args: |
             SHORTENER_VERSION=${{ steps.extract_name_and_version.outputs.ver }}
           cache-from: type=registry,ref=${{ env.REGISTRY_HOST }}/${{ github.repository }}:${{ steps.extract_name_and_version.outputs.minor_ver }}

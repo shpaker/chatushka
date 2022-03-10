@@ -4,7 +4,7 @@ from typing import Optional
 
 from chatushka.core.matchers.base import MatcherBase
 from chatushka.core.models import MatchedToken, RegexMatchKwargs
-from chatushka.core.transports.models import Message
+from chatushka.core.transports.models import Update
 
 logger = getLogger(__name__)
 
@@ -13,18 +13,14 @@ class RegexMatcher(MatcherBase):
 
     suffix = "regex"
 
-    # def _cast_token(
-    #     self,
-    #     token: str,
-    # ) -> Union[Hashable, Iterable[Hashable]]:
-    #     return compile(token)
-
     async def _check(
         self,
         token: str,  # type: ignore
-        message: Message,
+        update: Update,
     ) -> Optional[MatchedToken]:
-        if founded := findall(token, message.text):
+        if not update.message or not update.message.text:
+            return
+        if founded := findall(token, update.message.text):
             kwargs = RegexMatchKwargs(matched=tuple(founded))
             return MatchedToken(
                 token=token,

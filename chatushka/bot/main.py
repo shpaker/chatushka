@@ -11,6 +11,7 @@ from chatushka.bot.matchers import (
     jokes_matcher,
     lukashenko_matcher,
     suicide_matcher,
+    welcoming_matcher,
 )
 from chatushka.bot.settings import get_settings
 
@@ -30,6 +31,7 @@ def make_bot(
         helpers_matcher,
         suicide_matcher,
         lukashenko_matcher,
+        welcoming_matcher,
     )
     return instance
 

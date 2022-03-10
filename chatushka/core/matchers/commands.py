@@ -48,7 +48,7 @@ class CommandsMatcher(MatcherBase):
         token: str,
         update: Update,
     ) -> Optional[MatchedToken]:
-        if not update.message:
+        if not update.message or not update.message.text:
             return
         if self._whitelist and update.message.user.id not in self._whitelist:
             return

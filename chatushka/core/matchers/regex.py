@@ -18,7 +18,7 @@ class RegexMatcher(MatcherBase):
         token: str,  # type: ignore
         update: Update,
     ) -> Optional[MatchedToken]:
-        if not update.message:
+        if not update.message or not update.message.text:
             return
         if founded := findall(token, update.message.text):
             kwargs = RegexMatchKwargs(matched=tuple(founded))

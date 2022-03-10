@@ -4,6 +4,7 @@ from chatushka.bot.matchers.eight_ball import eight_ball_matcher
 from chatushka.bot.matchers.helpers import helpers_matcher
 from chatushka.bot.matchers.lukashenko import lukashenko_matcher
 from chatushka.bot.matchers.suicide import suicide_matcher
+from chatushka.bot.matchers.welcoming import welcoming_matcher
 
 __all__ = (
     "admin_matcher",
@@ -12,4 +13,5 @@ __all__ = (
     "helpers_matcher",
     "suicide_matcher",
     "lukashenko_matcher",
+    "welcoming_matcher",
 )

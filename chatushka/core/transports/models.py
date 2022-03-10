@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Optional
 
@@ -12,8 +12,12 @@ class ChatType(str, Enum):
 
 
 class ChatMemberStatuses(str, Enum):
+    MEMBER = "member"
     CREATOR = "creator"
     ADMINISTRATOR = "administrator"
+    LEFT = "left"
+    KICKED = "kicked"
+    RESTRICTED = "restricted"
 
 
 class User(BaseModel):
@@ -32,8 +36,8 @@ class User(BaseModel):
 class ChatMemberBase(BaseModel):
     status: ChatMemberStatuses
     user: User
-    is_anonymous: bool
-    custom_title: Optional[str]
+    is_anonymous: Optional[bool] = None
+    custom_title: Optional[str] = None
 
 
 class ChatMemberOwner(ChatMemberBase):
@@ -41,14 +45,14 @@ class ChatMemberOwner(ChatMemberBase):
 
 
 class ChatMemberAdministrator(ChatMemberBase):
-    can_be_edited: bool
-    can_manage_chat: bool
-    can_delete_messages: bool
-    can_manage_voice_chats: bool
-    can_restrict_members: bool
-    can_promote_members: bool
-    can_change_info: bool
-    can_invite_users: bool
+    can_be_edited: Optional[bool]
+    can_manage_chat: Optional[bool]
+    can_delete_messages: Optional[bool]
+    can_manage_voice_chats: Optional[bool]
+    can_restrict_members: Optional[bool]
+    can_promote_members: Optional[bool]
+    can_change_info: Optional[bool]
+    can_invite_users: Optional[bool]
     can_post_messages: Optional[bool]
     can_edit_messages: Optional[bool]
     can_pin_messages: Optional[bool]
@@ -64,29 +68,40 @@ class Message(BaseModel):
     message_id: int
     user: User = Field(..., alias="from")
     chat: Chat
-    text: str
+    text: Optional[str]
     reply_to_message: Optional["Message"] = None
 
 
 Message.update_forward_refs()
 
 
+class NewChatMember(
+    ChatMemberAdministrator,
+):
+    ...
+
+
+class OldChatMember(
+    ChatMemberAdministrator,
+):
+    ...
+
+
 class MyChatMember(BaseModel):
     chat: Chat
     user: User = Field(..., alias="from")
     date: datetime
-    new_chat_member: ChatMemberBase
+    old_chat_member: OldChatMember
+    new_chat_member: NewChatMember
 
-    # class Config:
-    #     json_decoders = {
-    #         datetime: lambda v: datetime.fromtimestamp(v),
-    #     }
+    class Config:
+        json_decoders = dict(datetime=lambda v: datetime.fromtimestamp(v, tz=timezone.utc))
 
 
 class Update(BaseModel):
     update_id: int
     message: Optional[Message] = None
-    my_chat_member: Optional[MyChatMember]
+    my_chat_member: Optional[MyChatMember] = None
 
 
 class ChatPermissions(BaseModel):

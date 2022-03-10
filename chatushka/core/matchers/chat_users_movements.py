@@ -12,8 +12,6 @@ logger = getLogger(__name__)
 @unique
 class ChatUsersMovementsEventsEnum(Enum):
     CAME = auto()
-    LEAVE = auto()
-    # CHANGE_STATE = auto()
 
 
 class ChatUsersMovementsMatcher(MatcherBase):
@@ -30,13 +28,5 @@ class ChatUsersMovementsMatcher(MatcherBase):
         token: Hashable,
         update: Update,
     ) -> Optional[MatchedToken]:
-        pass
-        # words = tuple(word for word in message.text.split(" ") if word)
-        # for i, word in enumerate(words):
-        #     if not self._case_sensitive:
-        #         word = word.lower()
-        #     if token == word:
-        #         return MatchedToken(
-        #             token=token,
-        #             args=tuple(words[i + 1 :]),  # noqa
-        #         )
+        if update.my_chat_member is None and update.message and update.message.text is None:
+            return MatchedToken(token=ChatUsersMovementsEventsEnum.CAME)

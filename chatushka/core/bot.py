@@ -54,7 +54,7 @@ class ChatushkaBot(EventsMatcher):
 
     @property
     def help_message_text(self):
-        output = f"*CHATUSHKA BOT {__VERSION__}*\n`_powered by {__URL__}_`"
+        output = f"*CHATUSHKA BOT {__VERSION__}*\n`/powered by {__URL__}/`"
         for help_message in self.help_messages:
             output += f"\n\n*{', '.join(help_message.tokens)}*\n> {help_message.message}"
         return output
@@ -68,6 +68,8 @@ class ChatushkaBot(EventsMatcher):
                     timeout=_HTTP_POOLING_TIMEOUT,
                     offset=offset,
                 )
+                if updates:
+                    offset = latest_update_id + 1
             except Exception as err:  # noqa, pylint: disable=broad-except
                 logger.error(err)
                 await sleep(_HTTP_POOLING_DELAY)
@@ -83,7 +85,6 @@ class ChatushkaBot(EventsMatcher):
                         if self.debug:
                             raise
                         logger.error(err)
-                offset = latest_update_id + 1
             await sleep(_HTTP_POOLING_DELAY)
 
     async def _close(self) -> None:

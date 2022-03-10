@@ -83,7 +83,8 @@ class TelegramBotApi:
                 latest_update_id = result["update_id"]  # type: ignore
             try:
                 update = models.Update(**result)  # type: ignore
-            except ValidationError:
+            except ValidationError as err:
+                logger.debug(err)
                 continue
             updates_list.append(update)
         return updates_list, latest_update_id  # type: ignore

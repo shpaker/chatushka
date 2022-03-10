@@ -2,7 +2,7 @@ from typing import Hashable, Iterable, Optional, Union
 
 from chatushka.core.matchers.base import MatcherBase
 from chatushka.core.models import MatchedToken
-from chatushka.core.transports.models import Message
+from chatushka.core.transports.models import Update
 
 
 class CommandsMatcher(MatcherBase):
@@ -46,11 +46,13 @@ class CommandsMatcher(MatcherBase):
     async def _check(
         self,
         token: str,
-        message: Message,
+        update: Update,
     ) -> Optional[MatchedToken]:
-        if self._whitelist and message.user.id not in self._whitelist:
+        if not update.message:
             return
-        words = tuple(word for word in message.text.split(" ") if word)
+        if self._whitelist and update.message.user.id not in self._whitelist:
+            return
+        words = tuple(word for word in update.message.text.split(" ") if word)
         for i, word in enumerate(words):
             if not self._case_sensitive:
                 word = word.lower()

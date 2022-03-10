@@ -6,7 +6,7 @@ from typing import Any, Callable, Hashable, Iterable, NamedTuple, Optional, Unio
 
 from chatushka.core.models import HANDLER_TYPING, MatchedToken
 from chatushka.core.protocols import MatcherProtocol
-from chatushka.core.transports.models import Message
+from chatushka.core.transports.models import Update
 from chatushka.core.transports.telegram_bot_api import TelegramBotApi
 
 
@@ -81,41 +81,43 @@ class MatcherBase(ABC):
     async def match(
         self,
         api: TelegramBotApi,
-        message: Message,
+        update: Update,
         *,
         should_call_matched: bool = False,
     ) -> list[MatchedToken]:
         matched_handlers = []
         for token in self.handlers.keys():
-            if matched := await self._check(token, message):
+            if matched := await self._check(token, update):
                 matched_handlers.append(matched)
                 if should_call_matched:
                     await self.call(
                         api=api,
                         token=matched.token,
-                        message=message,
+                        update=update,
                         kwargs=matched.kwargs | dict(args=matched.args),
                     )
         for matcher in self.matchers:
-            matched_handlers += await matcher.match(api, message, should_call_matched=should_call_matched)
+            matched_handlers += await matcher.match(api, update, should_call_matched=should_call_matched)
         return matched_handlers
 
     async def call(
         self,
         api: TelegramBotApi,
         token: Hashable,
-        message: Optional[Message] = None,
+        update: Optional[Update] = None,
         kwargs: Optional[dict[str, Any]] = None,
     ) -> None:
         if not kwargs:
             kwargs = {}
-        kwargs = kwargs | dict(api=api, message=message, token=token)
+        kwargs = kwargs | dict(api=api, update=update, token=token)
         handlers = self.handlers.get(token)
         if not handlers:
             return
         for handler in handlers:
             sig = signature(handler)
             sig_kwargs = {param: kwargs.get(param) for param in sig.parameters if param in kwargs}
+            if update and update.message is not None and "message" in sig.parameters:
+                sig_kwargs["message"] = update.message
             if iscoroutinefunction(handler):
                 await handler(**sig_kwargs)  # type: ignore
                 continue
@@ -132,7 +134,7 @@ class MatcherBase(ABC):
     async def _check(
         self,
         token: Hashable,
-        message: Message,
+        update: Update,
     ) -> Optional[MatchedToken]:
         return None
 

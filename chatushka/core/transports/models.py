@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import Enum
 from typing import Optional
 
@@ -70,9 +71,22 @@ class Message(BaseModel):
 Message.update_forward_refs()
 
 
+class MyChatMember(BaseModel):
+    chat: Chat
+    user: User = Field(..., alias="from")
+    date: datetime
+    new_chat_member: ChatMemberBase
+
+    # class Config:
+    #     json_decoders = {
+    #         datetime: lambda v: datetime.fromtimestamp(v),
+    #     }
+
+
 class Update(BaseModel):
     update_id: int
-    message: Message
+    message: Optional[Message] = None
+    my_chat_member: Optional[MyChatMember]
 
 
 class ChatPermissions(BaseModel):

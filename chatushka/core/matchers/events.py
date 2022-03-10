@@ -3,7 +3,7 @@ from typing import Hashable, Iterable, Optional, Union
 
 from chatushka.core.matchers.base import MatcherBase
 from chatushka.core.models import EventTypes, MatchedToken
-from chatushka.core.transports.models import Message
+from chatushka.core.transports.models import Update
 
 logger = getLogger(__name__)
 
@@ -20,6 +20,6 @@ class EventsMatcher(MatcherBase):
     async def _check(
         self,
         token: Hashable,
-        message: Message,
+        update: Update,
     ) -> Optional[MatchedToken]:
         return MatchedToken(token=EventTypes.MESSAGE)

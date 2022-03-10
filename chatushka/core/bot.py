@@ -6,12 +6,14 @@ from typing import Optional
 
 from chatushka.__version__ import __URL__, __VERSION__
 from chatushka.core.matchers import CommandsMatcher, EventsMatcher, EventTypes
-from chatushka.core.models import MatchedToken
 from chatushka.core.transports.models import Message
 from chatushka.core.transports.telegram_bot_api import TelegramBotApi
 from chatushka.core.transports.utils import check_preconditions
 
 logger = getLogger(__name__)
+
+_HTTP_POOLING_TIMEOUT = 60
+_HTTP_POOLING_DELAY = 2
 
 
 async def _message_handler(
@@ -24,6 +26,7 @@ async def _message_handler(
         text=bot_instance.help_message_text,
         reply_to_message_id=message.message_id,
         parse_mode="markdown",
+        disable_web_page_preview=True,
     )
 
 
@@ -51,7 +54,7 @@ class ChatushkaBot(EventsMatcher):
 
     @property
     def help_message_text(self):
-        output = f"*CHATUSHKA BOT {__VERSION__}*\n_powered by ${__URL__}_"
+        output = f"*CHATUSHKA BOT {__VERSION__}*\n`_powered by {__URL__}_`"
         for help_message in self.help_messages:
             output += f"\n\n*{', '.join(help_message.tokens)}*\n> {help_message.message}"
         return output
@@ -61,32 +64,27 @@ class ChatushkaBot(EventsMatcher):
         offset: Optional[int] = None
         while True:
             try:
-                updates, latest_update_id = await self.api.get_updates(timeout=60, offset=offset)
+                updates, latest_update_id = await self.api.get_updates(
+                    timeout=_HTTP_POOLING_TIMEOUT,
+                    offset=offset,
+                )
             except Exception as err:  # noqa, pylint: disable=broad-except
                 logger.error(err)
-                await sleep(1)
+                await sleep(_HTTP_POOLING_DELAY)
                 continue
             if updates:
                 for update in updates:
-                    message = update.message
-                    logger.debug(
-                        f'[ {message.chat.id} "{message.chat.title}" ] '
-                        f'[ {message.user.id} "{message.user.readable_name}" ] -> '
-                        f"{message.text}"
-                    )
                     try:
                         for matcher in self.matchers:
-                            matched_handlers = await matcher.match(self.api, message, should_call_matched=True)
-                            for handler in matched_handlers:  # type: MatchedToken
-                                logger.debug(
-                                    f'[ {message.chat.id} "{message.chat.title}" ] '
-                                    f'[ {message.user.id} "{message.user.readable_name}" ] <- '
-                                    f"{handler.token}"
-                                )
+                            matched_handlers = await matcher.match(self.api, update, should_call_matched=True)
+                            if matched_handlers:
+                                logger.debug(f"Matched {len(matched_handlers)} handlers")
                     except Exception as err:  # noqa, pylint: disable=broad-except
+                        if self.debug:
+                            raise
                         logger.error(err)
                 offset = latest_update_id + 1
-            await sleep(1)
+            await sleep(_HTTP_POOLING_DELAY)
 
     async def _close(self) -> None:
         await self.call(self.api, EventTypes.SHUTDOWN)

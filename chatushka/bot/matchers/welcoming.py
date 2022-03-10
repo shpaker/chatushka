@@ -12,8 +12,9 @@ async def came_handler(
     api: TelegramBotApi,
     message: Message,
 ) -> None:
-    text = f'Hi, <a href="tg://user?id={message.user.id}">{message.user.readable_name}</a>!'
-    await api.send_message(
-        chat_id=message.chat.id,
-        text=text,
-    )
+    for user in message.new_chat_members:
+        text = f'Привет, <a href="tg://user?id={user.id}">{user.readable_name}</a>!'
+        await api.send_message(
+            chat_id=message.chat.id,
+            text=text,
+        )

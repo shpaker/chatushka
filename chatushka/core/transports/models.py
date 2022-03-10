@@ -64,17 +64,6 @@ class Chat(BaseModel):
     title: Optional[str]
 
 
-class Message(BaseModel):
-    message_id: int
-    user: User = Field(..., alias="from")
-    chat: Chat
-    text: Optional[str]
-    reply_to_message: Optional["Message"] = None
-
-
-Message.update_forward_refs()
-
-
 class NewChatMember(
     ChatMemberAdministrator,
 ):
@@ -85,6 +74,18 @@ class OldChatMember(
     ChatMemberAdministrator,
 ):
     ...
+
+
+class Message(BaseModel):
+    message_id: int
+    user: User = Field(..., alias="from")
+    chat: Chat
+    text: Optional[str]
+    reply_to_message: Optional["Message"] = None
+    new_chat_members: list[User] = Field(default_factory=list)
+
+
+Message.update_forward_refs()
 
 
 class MyChatMember(BaseModel):

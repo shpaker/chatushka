@@ -16,6 +16,8 @@ jobs:
     strategy:
       matrix:
         pre-commit-hook:
+          - isort
+          - black
           - flake8
           - pylint
 #          - mypy

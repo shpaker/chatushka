@@ -4,7 +4,7 @@ from typing import Hashable, Optional, Union
 
 from chatushka.core.matchers.base import MatcherBase
 from chatushka.core.models import MatchedToken
-from chatushka.core.transports.models import Update
+from chatushka.core.transports.models import ChatMemberStatuses, Update
 
 logger = getLogger(__name__)
 
@@ -28,5 +28,8 @@ class ChatUsersMovementsMatcher(MatcherBase):
         token: Hashable,
         update: Update,
     ) -> Optional[MatchedToken]:
-        if update.my_chat_member is None and update.message and update.message.text is None:
+        if (
+            update.my_chat_member is not None
+            and update.my_chat_member.new_chat_member.status is ChatMemberStatuses.MEMBER
+        ):
             return MatchedToken(token=ChatUsersMovementsEventsEnum.CAME)

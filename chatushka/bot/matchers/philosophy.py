@@ -36,8 +36,10 @@ async def philosophy_handler(
     message: Message,
     matched: list[str],  # noqa, pylint: disable=unused-argument
 ) -> None:
-    await api.send_message(
-        chat_id=message.chat.id,
-        text=_RESPONSE,
-        reply_to_message_id=message.message_id,
-    )
+    rand_int = randrange(3)
+    if rand_int == 1:
+        await api.send_message(
+            chat_id=message.chat.id,
+            text=_RESPONSE,
+            reply_to_message_id=message.message_id,
+        )

@@ -21,7 +21,7 @@ async def exclamation_handler(
     message: Message,
     matched: list[str],  # noqa, pylint: disable=unused-argument
 ) -> None:
-    rand_int = randrange(8)
+    rand_int = randrange(16)
     if rand_int == 1:
         await api.send_message(
             chat_id=message.chat.id,

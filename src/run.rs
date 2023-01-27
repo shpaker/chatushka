@@ -1,5 +1,3 @@
-use regex::Regex;
-
 use super::{
     ChatListener,
     Settings,

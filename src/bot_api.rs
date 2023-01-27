@@ -90,7 +90,7 @@ impl BotAPI {
         reply_to_message_id: i64,
         timeout: u64,
     ) -> Option<Value,> {
-        let mut request_data = HashMap::from([
+        let request_data = HashMap::from([
             ("chat_id", chat_id.to_string(),),
             ("text", text.to_string(),),
             ("reply_to_message_id", reply_to_message_id.to_string(),),

@@ -1,5 +1,3 @@
-use std::fs::Metadata;
-
 use regex::Regex;
 
 use super::{

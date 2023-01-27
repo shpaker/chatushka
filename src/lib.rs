@@ -4,10 +4,7 @@ pub(crate) use crate::{
     bot_api::BotAPI,
     chat_listener::ChatListener,
     constants::APIMethods,
-    matcher::{
-        Matcher,
-        RegExMatcher,
-    },
+    matcher::Matcher,
     responses::Message,
     settings::Settings,
 };

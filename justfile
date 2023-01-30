@@ -1,6 +1,16 @@
-build:
-  cargo build src/
+set dotenv-load
 
-do-it:
+_fmt:
   cargo fmt
-  cargo run src/
+
+build: _fmt
+  cargo build
+
+run: _fmt
+  cargo run -- --token ${TELEGRAM_TOKEN}
+
+help: _fmt
+  cargo run -- --help
+
+pre-commit:
+	pre-commit run

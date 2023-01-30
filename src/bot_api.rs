@@ -3,12 +3,27 @@ use std::{
     time::Duration,
 };
 
-use reqwest::blocking::Client;
+use reqwest::{
+    blocking::Client,
+    StatusCode,
+};
 use serde_json::Value;
 
-use super::APIMethods;
+use super::BotErrors;
 
-#[derive(Debug,)]
+enum APIMethods {
+    GETUPDATES,
+    SENDMESSAGE,
+}
+impl APIMethods {
+    fn as_str(&self,) -> &'static str {
+        match self {
+            APIMethods::GETUPDATES => "GetUpdates",
+            APIMethods::SENDMESSAGE => "SendMessage",
+        }
+    }
+}
+
 pub struct BotAPI {
     api_endpoint: String,
 }
@@ -16,10 +31,7 @@ pub struct BotAPI {
 impl BotAPI {
     pub fn new(token: &str,) -> BotAPI {
         BotAPI {
-            api_endpoint: format!(
-                "https://api.telegram.org/bot{}",
-                token
-            ),
+            api_endpoint: format!("https://api.telegram.org/bot{}", token,),
         }
     }
 
@@ -27,60 +39,54 @@ impl BotAPI {
         &self,
         method: APIMethods,
     ) -> String {
-        format!("{}/{}", self.api_endpoint, method.as_string())
+        format!("{}/{}", self.api_endpoint, method.as_str())
     }
 
-    pub fn api_send(
+    fn api_send(
         &self,
         method: APIMethods,
         data: &HashMap<&str, String,>,
         timeout: u64,
-    ) -> Option<Value,> {
+    ) -> Result<Value, BotErrors,> {
         let client = Client::new();
         let url: String = self.make_url(method,);
-        match client
+        let response = match client
             .post(url,)
             .json(&data,)
             .timeout(Duration::from_secs(timeout,),)
             .send()
         {
-            Err(_why,) => {
-                println!("{:?}", _why);
-                return None;
-            }
-            Ok(resp,) => {
-                match resp.text() {
-                    Err(_why,) => return None,
-                    Ok(result,) => {
-                        let response_map: HashMap<String, Value,> =
-                            serde_json::from_str(result.as_str(),)
-                                .unwrap();
-                        if response_map["ok"] != true {
-                            return None;
-                        }
-                        let result_field = &response_map["result"];
-                        return Some(result_field.clone(),);
-                    }
-                };
-            }
+            Ok(response,) => response,
+            Err(_err,) => return Err(BotErrors::ConnectionError,),
         };
+        if response.status() != StatusCode::OK {
+            return Err(BotErrors::APIError,);
+        }
+        let str_data = match response.text() {
+            Ok(str_data,) => str_data,
+            Err(_err,) => return Err(BotErrors::IncorrectResponse,),
+        };
+        let response_map: HashMap<String, Value,> =
+            serde_json::from_str(str_data.as_str(),).unwrap();
+        if response_map["ok"] != true {
+            return Err(BotErrors::NotOkResponse,);
+        }
+        let result_field = &response_map["result"];
+        Ok(result_field.clone(),)
     }
 
     pub fn get_updates(
         &self,
         offset: Option<i64,>,
         timeout: u64,
-    ) -> Option<Value,> {
+    ) -> Result<Value, BotErrors,> {
         let mut request_data: HashMap<&str, String,> = HashMap::new();
         if !offset.is_none() {
             request_data.insert("offset", offset.unwrap().to_string(),);
         };
-        let resp = self.api_send(
-            APIMethods::GETUPDATES,
-            &request_data,
-            timeout,
-        );
-        return resp;
+        let response =
+            self.api_send(APIMethods::GETUPDATES, &request_data, timeout,)?;
+        Ok(response,)
     }
 
     pub fn send_message(
@@ -89,19 +95,15 @@ impl BotAPI {
         text: &str,
         reply_to_message_id: i64,
         timeout: u64,
-    ) -> Option<Value,> {
+    ) -> Result<Value, BotErrors,> {
         let request_data = HashMap::from([
             ("chat_id", chat_id.to_string(),),
             ("text", text.to_string(),),
             ("reply_to_message_id", reply_to_message_id.to_string(),),
             ("parse_mode", "html".to_string(),),
         ],);
-        // request_data
-        let resp = self.api_send(
-            APIMethods::SENDMESSAGE,
-            &request_data,
-            timeout,
-        );
-        return resp;
+        let response =
+            self.api_send(APIMethods::SENDMESSAGE, &request_data, timeout,)?;
+        Ok(response,)
     }
 }

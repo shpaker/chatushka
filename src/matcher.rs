@@ -13,15 +13,19 @@ pub trait Matcher {
     );
 }
 
-#[derive(Debug,)]
 pub struct RegExMatcher {
     regex: Regex,
+    cb: fn(&BotAPI, &Message,),
 }
 
 impl RegExMatcher {
-    pub fn new(regex: &str,) -> RegExMatcher {
+    pub fn new(
+        regex: &str,
+        cb: fn(&BotAPI, &Message,),
+    ) -> RegExMatcher {
         RegExMatcher {
             regex: Regex::new(regex,).unwrap(),
+            cb: cb,
         }
     }
 }
@@ -33,10 +37,7 @@ impl Matcher for RegExMatcher {
         message: &Message,
     ) {
         if self.regex.is_match(message.text.as_str(),) {
-            api.send_message(message.chat_id, "wow", message.id, 16,);
+            (self.cb)(api, message,);
         }
-        // println!("{:?}", message.text);
-        // println!("{:?}", a);
-        // !found.is_none()
     }
 }

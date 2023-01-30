@@ -1,7 +1,6 @@
-use serde_json::Value;
-
 use super::{
     BotAPI,
+    BotErrors,
     Matcher,
     Message,
 };
@@ -21,7 +20,6 @@ fn get_latest_update_id(messages: &Vec<Message,>,) -> i64 {
     return latest_update_id;
 }
 
-#[derive(Debug,)]
 pub struct ChatListener<'a,> {
     api: BotAPI,
     matchers: &'a Vec<RegExMatcher,>,
@@ -29,70 +27,50 @@ pub struct ChatListener<'a,> {
 
 impl ChatListener<'_,> {
     pub fn new<'a,>(
-        token: &str,
+        token: &'a str,
         matchers: &'a Vec<RegExMatcher,>,
     ) -> ChatListener<'a,> {
-        for matcher in matchers {
-            println!("{:#?}", matcher);
-        }
         ChatListener {
             api: BotAPI::new(token,),
             matchers: matchers,
         }
     }
 
-    pub fn get_message_updates(
+    fn get_message_updates(
         &self,
         offset: Option<i64,>,
         timeout: u64,
-    ) -> Option<Vec<Message,>,> {
-        let response = self.api.get_updates(offset, timeout,);
-        if response.is_none() {
-            return None;
-        }
+    ) -> Result<Vec<Message,>, BotErrors,> {
+        let response = self.api.get_updates(offset, timeout,)?;
         let mut messages: Vec<Message,> = Vec::new();
-        for entry in response.unwrap().as_array().unwrap() {
-            let entry_map = entry.as_object();
-            if entry_map.is_none() {
-                continue;
-            }
-            let messages_json = entry_map.unwrap();
-            if messages_json["message"]["text"] == Value::Null {
+        for entry in response.as_array().unwrap() {
+            let entry_json = match entry.as_object() {
+                None => continue,
+                Some(entry_map,) => entry_map,
+            };
+            if entry_json.get("message",) == None {
                 continue;
             }
             messages.push(Message {
-                id: messages_json["message"]["message_id"]
-                    .as_i64()
-                    .unwrap(),
-                update_id: messages_json["update_id"].as_i64().unwrap(),
-                chat_id: messages_json["message"]["chat"]["id"]
-                    .as_i64()
-                    .unwrap(),
-                text: messages_json["message"]["text"]
-                    .as_str()
-                    .unwrap()
-                    .to_string(),
+                id: entry_json["message"]["message_id"].as_i64().unwrap(),
+                update_id: entry_json["update_id"].as_i64().unwrap(),
+                chat_id: entry_json["message"]["chat"]["id"].as_i64().unwrap(),
+                text: entry_json["message"]["text"].as_str().unwrap().to_string(),
             },);
         }
-        return Some(messages,);
+        return Ok(messages,);
     }
 
-    pub fn long_polling(&self,) {
-        let mut updates = self.get_message_updates(None, 16,);
-        let mut latest_update_id =
-            get_latest_update_id(&updates.unwrap(),);
+    pub fn long_polling(&self,) -> Result<(), BotErrors,> {
+        let mut massages = self.get_message_updates(None, 16,)?;
+        let mut next_update_id = get_latest_update_id(&massages,) + 1;
         loop {
-            updates = self
-                .get_message_updates(Some(latest_update_id + 1,), 60,);
-            if updates.is_none() {
+            massages = self.get_message_updates(Some(next_update_id,), 60,)?;
+            if massages.len() == 0 {
                 continue;
             }
-            let unwrapped = updates.unwrap();
-            if unwrapped.len() == 0 {
-                continue;
-            }
-            latest_update_id = get_latest_update_id(&unwrapped,);
-            for massage in unwrapped.into_iter() {
+            next_update_id = get_latest_update_id(&massages,) + 1;
+            for massage in massages.into_iter() {
                 for matcher in self.matchers.into_iter() {
                     matcher.check(&self.api, &massage,);
                 }

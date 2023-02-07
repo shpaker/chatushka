@@ -1,3 +1,10 @@
+use std::{
+    thread,
+    time,
+};
+
+use log::info;
+
 use super::{
     BotAPI,
     BotErrors,
@@ -51,6 +58,9 @@ impl ChatListener<'_,> {
             if entry_json.get("message",) == None {
                 continue;
             }
+            if entry_json["message"].get("text",) == None {
+                continue;
+            }
             messages.push(Message {
                 id: entry_json["message"]["message_id"].as_i64().unwrap(),
                 update_id: entry_json["update_id"].as_i64().unwrap(),
@@ -62,11 +72,20 @@ impl ChatListener<'_,> {
     }
 
     pub fn long_polling(&self,) -> Result<(), BotErrors,> {
+        let delay = time::Duration::from_secs(2,);
         let mut massages = self.get_message_updates(None, 16,)?;
         let mut next_update_id = get_latest_update_id(&massages,) + 1;
         loop {
-            massages = self.get_message_updates(Some(next_update_id,), 60,)?;
+            massages = match self.get_message_updates(Some(next_update_id,), 60,) {
+                Err(err,) => {
+                    info!("get updates err: {:?}", err);
+                    thread::sleep(delay,);
+                    continue;
+                }
+                Ok(value,) => value,
+            };
             if massages.len() == 0 {
+                thread::sleep(delay,);
                 continue;
             }
             next_update_id = get_latest_update_id(&massages,) + 1;
@@ -75,6 +94,7 @@ impl ChatListener<'_,> {
                     matcher.check(&self.api, &massage,);
                 }
             }
+            thread::sleep(delay,);
         }
     }
 }

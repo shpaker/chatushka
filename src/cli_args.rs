@@ -7,4 +7,6 @@ pub struct CliArgs {
     pub token: String,
     #[arg(short, long, action)]
     pub debug: bool,
+    #[arg(short, long)]
+    pub config: String,
 }

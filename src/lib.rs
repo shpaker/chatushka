@@ -1,3 +1,5 @@
+pub use config::read_config;
+pub use logger::init_logger;
 pub use run::run;
 
 pub(crate) use crate::{
@@ -15,7 +17,9 @@ pub(crate) use crate::{
 mod bot_api;
 mod chat_listener;
 mod cli_args;
+mod config;
 mod errors;
+mod logger;
 mod matcher;
 mod responses;
 mod run;

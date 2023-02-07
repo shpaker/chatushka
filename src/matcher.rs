@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use regex::Regex;
 
 use super::{
@@ -11,6 +13,14 @@ pub trait Matcher {
         api: &BotAPI,
         message: &Message,
     );
+    // fn check_config(
+    //     &self,
+    //     config: HashMap<String, String>,
+    // );
+    // fn from_config(
+    //     &self,
+    //     config: HashMap<String, String>,
+    // );
 }
 
 pub struct RegExMatcher {

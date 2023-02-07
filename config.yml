@@ -1,0 +1,13 @@
+---
+- matcher:
+    kind: regex
+    rule: '^(.*\s)*hello\s*.*$'
+  action:
+    kind: message
+    template: 'hi'
+- matcher:
+    kind: regex
+    rule: '^(.*\s)*foo\s*.*$'
+  action:
+    kind: message
+    template: 'bar'

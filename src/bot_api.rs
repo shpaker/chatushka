@@ -80,7 +80,8 @@ impl BotAPI {
         offset: Option<i64,>,
         timeout: u64,
     ) -> Result<Value, BotErrors,> {
-        let mut request_data: HashMap<&str, String,> = HashMap::new();
+        let mut request_data: HashMap<&str, String,> =
+            HashMap::from([("timeout", timeout.to_string(),),],);
         if !offset.is_none() {
             request_data.insert("offset", offset.unwrap().to_string(),);
         };

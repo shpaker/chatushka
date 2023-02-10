@@ -11,7 +11,6 @@ use super::{
     Matcher,
     Message,
 };
-use crate::matcher::RegExMatcher;
 
 fn get_latest_update_id(messages: &Vec<Message,>,) -> i64 {
     let mut latest_update_id: i64 = 0;
@@ -27,19 +26,19 @@ fn get_latest_update_id(messages: &Vec<Message,>,) -> i64 {
     return latest_update_id;
 }
 
-pub struct ChatListener<'a,> {
+pub struct ChatListener {
     api: BotAPI,
-    matchers: &'a Vec<RegExMatcher,>,
+    matchers: Vec<Box<dyn Matcher,>,>,
 }
 
-impl ChatListener<'_,> {
-    pub fn new<'a,>(
-        token: &'a str,
-        matchers: &'a Vec<RegExMatcher,>,
-    ) -> ChatListener<'a,> {
+impl ChatListener {
+    pub fn new(
+        token: &str,
+        matchers: Vec<Box<dyn Matcher,>,>,
+    ) -> ChatListener {
         ChatListener {
             api: BotAPI::new(token,),
-            matchers: matchers,
+            matchers,
         }
     }
 
@@ -89,9 +88,11 @@ impl ChatListener<'_,> {
                 continue;
             }
             next_update_id = get_latest_update_id(&massages,) + 1;
-            for massage in massages.into_iter() {
-                for matcher in self.matchers.into_iter() {
-                    matcher.check(&self.api, &massage,);
+            for message in massages.into_iter() {
+                for matcher in &self.matchers {
+                    if matcher.is_check(&message,) {
+                        matcher.call(&self.api, &message,);
+                    };
                 }
             }
             thread::sleep(delay,);

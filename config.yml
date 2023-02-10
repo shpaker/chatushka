@@ -1,13 +1,13 @@
 ---
-- matcher:
-    kind: regex
-    rule: '^(.*\s)*hello\s*.*$'
-  action:
-    kind: message
+- kind: 'regex'
+  rule: '^(.*\s)*hello\s*.*$'
+  actions:
+    kind: 'message'
     template: 'hi'
-- matcher:
-    kind: regex
-    rule: '^(.*\s)*foo\s*.*$'
-  action:
-    kind: message
+- kind: 'command'
+  token: 'health'
+  case_insensitive: true
+  prefix: '!'
+  actions:
+    kind: 'message'
     template: 'bar'

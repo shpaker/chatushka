@@ -3,17 +3,23 @@ pub use logger::init_logger;
 pub use run::run;
 
 pub(crate) use crate::{
+    actions::{
+        Action,
+        MessageAction,
+    },
     bot_api::BotAPI,
     chat_listener::ChatListener,
     cli_args::CliArgs,
     errors::BotErrors,
     matcher::{
+        CommandMatcher,
         Matcher,
         RegExMatcher,
     },
     responses::Message,
 };
 
+mod actions;
 mod bot_api;
 mod chat_listener;
 mod cli_args;

@@ -1,53 +1,65 @@
-use std::collections::HashMap;
-
 use regex::Regex;
 
 use super::{
+    Action,
     BotAPI,
     Message,
 };
 
 pub trait Matcher {
-    fn check(
+    fn is_check(
+        &self,
+        message: &Message,
+    ) -> bool;
+    fn call(
         &self,
         api: &BotAPI,
         message: &Message,
     );
-    // fn check_config(
-    //     &self,
-    //     config: HashMap<String, String>,
-    // );
-    // fn from_config(
-    //     &self,
-    //     config: HashMap<String, String>,
-    // );
 }
 
 pub struct RegExMatcher {
-    regex: Regex,
-    cb: fn(&BotAPI, &Message,),
-}
-
-impl RegExMatcher {
-    pub fn new(
-        regex: &str,
-        cb: fn(&BotAPI, &Message,),
-    ) -> RegExMatcher {
-        RegExMatcher {
-            regex: Regex::new(regex,).unwrap(),
-            cb: cb,
-        }
-    }
+    pub regex: Regex,
+    pub case_insensitive: bool,
+    pub action: Box<dyn Action,>,
 }
 
 impl Matcher for RegExMatcher {
-    fn check(
+    fn is_check(
+        &self,
+        message: &Message,
+    ) -> bool {
+        self.regex.is_match(message.text.as_str(),)
+    }
+    fn call(
         &self,
         api: &BotAPI,
         message: &Message,
     ) {
-        if self.regex.is_match(message.text.as_str(),) {
-            (self.cb)(api, message,);
-        }
+        self.action.call(api, message,);
+    }
+}
+
+pub struct CommandMatcher {
+    pub token: &'static str,
+    pub case_insensitive: bool,
+    pub prefixes: Vec<char,>,
+    pub action: Box<dyn Action,>,
+}
+
+impl Matcher for CommandMatcher {
+    fn is_check(
+        &self,
+        message: &Message,
+    ) -> bool {
+        message.text.starts_with(&self.token,)
+    }
+
+    fn call(
+        &self,
+        api: &BotAPI,
+        message: &Message,
+    ) {
+        self.action.call(api, message,);
     }
 }

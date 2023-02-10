@@ -7,11 +7,25 @@ use serde::{
     Serialize,
 };
 
-// #[derive(Serialize, Deserialize, PartialEq, Debug,)]
-// pub struct Aaa {
-//     kind: String,
-//     args: HashMap<String, String,>,
-// }
+pub trait ConfigMatcher {
+    fn as_matcher(&self,);
+}
+
+pub struct ConfigRegExMatcher {
+    kind: String,
+    rule: String,
+}
+
+impl ConfigMatcher for ConfigRegExMatcher {
+    fn as_matcher(&self,) {
+        todo!()
+    }
+}
+
+pub struct ConfigCommandMatcher {
+    kind: String,
+    command: String,
+}
 
 #[derive(Serialize, Deserialize, PartialEq, Debug,)]
 pub struct RawConfigEntry {

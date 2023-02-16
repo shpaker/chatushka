@@ -1,13 +1,16 @@
 ---
-- kind: 'regex'
+kind: 'regex'
+args:
   rule: '^(.*\s)*hello\s*.*$'
-  actions:
-    kind: 'message'
-    template: 'hi'
-- kind: 'command'
-  token: 'health'
-  case_insensitive: true
-  prefix: '!'
-  actions:
-    kind: 'message'
-    template: 'bar'
+action:
+  kind: 'message'
+  args:
+    template: 'hie'
+---
+kind: 'command'
+args:
+  token: 'ping'
+action:
+  kind: 'message'
+  args:
+    template: 'pong'

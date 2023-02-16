@@ -5,3 +5,10 @@ pub enum BotErrors {
     NotOkResponse,
     IncorrectResponse,
 }
+
+#[derive(Debug,)]
+pub enum ConfigErrors {
+    UnknownMatcherType,
+    UnknownActionType,
+    MissingValue,
+}

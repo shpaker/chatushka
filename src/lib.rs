@@ -10,7 +10,10 @@ pub(crate) use crate::{
     bot_api::BotAPI,
     chat_listener::ChatListener,
     cli_args::CliArgs,
-    errors::BotErrors,
+    errors::{
+        BotErrors,
+        ConfigErrors,
+    },
     matcher::{
         CommandMatcher,
         Matcher,

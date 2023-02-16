@@ -12,7 +12,7 @@ pub trait Action {
 }
 
 pub struct MessageAction {
-    pub template: &'static str,
+    pub template: String,
 }
 
 impl Action for MessageAction {
@@ -21,7 +21,7 @@ impl Action for MessageAction {
         api: &BotAPI,
         message: &Message,
     ) {
-        let result = api.send_message(message.chat_id, self.template, message.id, 16,);
-        result.ok();
+        let _ =
+            api.send_message(message.chat_id, self.template.as_str(), message.id, 16,);
     }
 }

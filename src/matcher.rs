@@ -20,7 +20,7 @@ pub trait Matcher {
 
 pub struct RegExMatcher {
     pub regex: Regex,
-    pub case_insensitive: bool,
+    pub to_lower: bool,
     pub action: Box<dyn Action,>,
 }
 
@@ -41,7 +41,7 @@ impl Matcher for RegExMatcher {
 }
 
 pub struct CommandMatcher {
-    pub token: &'static str,
+    pub token: String,
     pub case_insensitive: bool,
     pub prefixes: Vec<char,>,
     pub action: Box<dyn Action,>,

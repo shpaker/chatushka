@@ -1,15 +1,6 @@
-use super::{
-    BotAPI,
-    Message,
-};
-
-pub trait Action {
-    fn call(
-        &self,
-        api: &BotAPI,
-        message: &Message,
-    );
-}
+use crate::bot::Message;
+use crate::Action;
+use crate::BotAPI;
 
 pub struct MessageAction {
     pub template: String,

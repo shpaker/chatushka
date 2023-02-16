@@ -9,7 +9,7 @@ use reqwest::{
 };
 use serde_json::Value;
 
-use super::BotErrors;
+use crate::BotErrors;
 
 enum APIMethods {
     GETUPDATES,

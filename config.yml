@@ -5,7 +5,7 @@ args:
 action:
   kind: 'message'
   args:
-    template: 'hie'
+    template: 'hi'
 ---
 kind: 'command'
 args:

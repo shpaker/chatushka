@@ -1,3 +1,3 @@
 fn main() {
-    chatushka::run()
+    chatushka::run();
 }

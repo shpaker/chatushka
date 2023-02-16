@@ -9,36 +9,48 @@ use serde::{
 
 use super::{
     Action,
-    CommandMatcher,
-    ConfigErrors,
-    Matcher,
     MessageAction,
-    RegExMatcher,
 };
 
-pub trait ConfigMatcher {
-    fn as_matcher(&self,);
+#[derive(Serialize, Deserialize, PartialEq, Debug,)]
+#[serde(rename_all = "lowercase")]
+enum MatchersKind {
+    RegEx,
+    Command,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug,)]
+#[serde(rename_all = "lowercase")]
+enum ActionsKind {
+    Message,
+}
+
+use super::{
+    CommandMatcher,
+    ConfigErrors,
+    Matcher,
+    RegExMatcher,
+};
+
+#[derive(Serialize, Deserialize, PartialEq, Debug,)]
 pub struct ActionEntry {
-    kind: String,
+    kind: ActionsKind,
     args: HashMap<String, String,>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug,)]
 pub struct MatcherEntry {
-    kind: String,
+    kind: MatchersKind,
     args: HashMap<String, String,>,
     action: ActionEntry,
 }
 
 fn make_action(
-    kind: &str,
+    kind: ActionsKind,
     args: &HashMap<String, String,>,
 ) -> Result<Box<dyn Action,>, ConfigErrors,> {
     match kind {
-        "message" => {
+        ActionsKind::Message => {
             let template = match args.get("template",) {
                 Some(value,) => value.clone(),
                 _ => return Err(ConfigErrors::MissingValue,),
@@ -47,29 +59,28 @@ fn make_action(
                 template: template,
             },),)
         }
-        _ => return Err(ConfigErrors::UnknownActionType,),
     }
 }
 
 fn make_matcher(
-    matcher_kind: &str,
-    matcher_args: &HashMap<String, String,>,
+    kind: MatchersKind,
+    args: &HashMap<String, String,>,
     action: Box<dyn Action,>,
 ) -> Result<Box<dyn Matcher,>, ConfigErrors,> {
-    match matcher_kind {
-        "regex" => {
-            let rule = match matcher_args.get("rule",) {
+    match kind {
+        MatchersKind::RegEx => {
+            let rule = match args.get("rule",) {
                 Some(value,) => value.clone(),
                 _ => return Err(ConfigErrors::MissingValue,),
             };
             Ok(Box::new(RegExMatcher {
                 regex: Regex::new(rule.as_str(),).unwrap(),
                 to_lower: true,
-                action: action,
+                action,
             },),)
         }
-        "command" => {
-            let token = match matcher_args.get("token",) {
+        MatchersKind::Command => {
+            let token = match args.get("token",) {
                 Some(value,) => value.clone(),
                 _ => return Err(ConfigErrors::MissingValue,),
             };
@@ -80,7 +91,6 @@ fn make_matcher(
                 action,
             },),)
         }
-        _ => return Err(ConfigErrors::UnknownMatcherType,),
     }
 }
 
@@ -93,8 +103,8 @@ pub fn read_config(path: &str,) -> Result<Vec<Box<dyn Matcher,>,>, ConfigErrors,
     for doc in serde_yaml::Deserializer::from_str(yaml.as_str(),) {
         let matcher_entry = MatcherEntry::deserialize(doc,).unwrap();
         let action =
-            make_action(&matcher_entry.action.kind, &matcher_entry.action.args,)?;
-        let matcher = make_matcher(&matcher_entry.kind, &matcher_entry.args, action,)?;
+            make_action(matcher_entry.action.kind, &matcher_entry.action.args,)?;
+        let matcher = make_matcher(matcher_entry.kind, &matcher_entry.args, action,)?;
         results.push(matcher,);
     }
     Ok(results,)

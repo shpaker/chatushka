@@ -7,9 +7,11 @@ use log::info;
 
 use super::{
     BotAPI,
+    Message,
+};
+use crate::{
     BotErrors,
     Matcher,
-    Message,
 };
 
 fn get_latest_update_id(messages: &Vec<Message,>,) -> i64 {

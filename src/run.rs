@@ -1,5 +1,9 @@
 use clap::Parser;
 use log::info;
+use rhai::{
+    Engine,
+    EvalAltResult,
+};
 
 use super::{
     read_config,

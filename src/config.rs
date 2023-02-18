@@ -2,6 +2,10 @@ use std::collections::HashMap;
 use std::fs::read_to_string;
 
 use regex::Regex;
+use rhai::{
+    Engine,
+    EvalAltResult,
+};
 use serde::{
     Deserialize,
     Serialize,
@@ -10,6 +14,7 @@ use serde::{
 use super::{
     Action,
     MessageAction,
+    RhaiAction,
 };
 
 #[derive(Serialize, Deserialize, PartialEq, Debug,)]
@@ -23,6 +28,7 @@ enum MatchersKind {
 #[serde(rename_all = "lowercase")]
 enum ActionsKind {
     Message,
+    Rhai,
 }
 
 use super::{
@@ -59,6 +65,13 @@ fn make_action(
                 template: template,
             },),)
         }
+        ActionsKind::Rhai => {
+            let script = match args.get("script",) {
+                Some(value,) => value.clone(),
+                _ => return Err(ConfigErrors::MissingValue,),
+            };
+            Ok(Box::new(RhaiAction { script: script, },),)
+        }
     }
 }
 
@@ -80,6 +93,18 @@ fn make_matcher(
             },),)
         }
         MatchersKind::Command => {
+            let token = match args.get("token",) {
+                Some(value,) => value.clone(),
+                _ => return Err(ConfigErrors::MissingValue,),
+            };
+            Ok(Box::new(CommandMatcher {
+                token,
+                case_insensitive: true,
+                prefixes: vec!['!', 'z'],
+                action,
+            },),)
+        }
+        _ => {
             let token = match args.get("token",) {
                 Some(value,) => value.clone(),
                 _ => return Err(ConfigErrors::MissingValue,),

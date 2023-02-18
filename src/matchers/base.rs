@@ -1,8 +1,12 @@
+use rhai::{
+    Engine,
+    EvalAltResult,
+};
+
 use crate::{
     BotAPI,
     Message,
 };
-
 pub trait Matcher {
     fn is_check(
         &self,
@@ -12,5 +16,6 @@ pub trait Matcher {
         &self,
         api: &BotAPI,
         message: &Message,
+        rhai_engine: &Engine,
     );
 }

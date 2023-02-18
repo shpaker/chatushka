@@ -1,4 +1,8 @@
 use regex::Regex;
+use rhai::{
+    Engine,
+    EvalAltResult,
+};
 
 use super::Matcher;
 use crate::{
@@ -20,11 +24,13 @@ impl Matcher for RegExMatcher {
     ) -> bool {
         self.regex.is_match(message.text.as_str(),)
     }
+
     fn call(
         &self,
         api: &BotAPI,
         message: &Message,
+        rhai_engine: &Engine,
     ) {
-        self.action.call(api, message,);
+        self.action.call(api, message, &rhai_engine,);
     }
 }

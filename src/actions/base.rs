@@ -1,3 +1,8 @@
+use rhai::{
+    Engine,
+    EvalAltResult,
+};
+
 use crate::{
     BotAPI,
     Message,
@@ -8,5 +13,6 @@ pub trait Action {
         &self,
         api: &BotAPI,
         message: &Message,
+        rhai_engine: &Engine,
     );
 }

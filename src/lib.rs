@@ -15,6 +15,7 @@ pub(crate) use crate::{
     actions::{
         Action,
         MessageAction,
+        RhaiAction,
     },
     bot::{
         BotAPI,

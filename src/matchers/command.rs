@@ -1,3 +1,8 @@
+use rhai::{
+    Engine,
+    EvalAltResult,
+};
+
 use super::Matcher;
 use crate::{
     Action,
@@ -24,7 +29,8 @@ impl Matcher for CommandMatcher {
         &self,
         api: &BotAPI,
         message: &Message,
+        rhai_engine: &Engine,
     ) {
-        self.action.call(api, message,);
+        self.action.call(api, message, &rhai_engine,);
     }
 }

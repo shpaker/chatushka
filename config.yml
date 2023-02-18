@@ -17,12 +17,8 @@ action:
 ---
 kind: 'command'
 args:
-  token: 'foo'
+  token: 'id'
 action:
   kind: 'rhai'
   args:
-    entrypoint: 'matcher_cb'
-    script: |
-      fn matcher_cb(chat_id, replay_id, message) {
-          send_message("test foo bar")
-      }
+    script: '"chat_id: " + to_string(CHAT_ID)'

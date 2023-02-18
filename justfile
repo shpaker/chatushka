@@ -1,15 +1,15 @@
 set dotenv-load
 
-_fmt:
+fmt:
   cargo fmt
 
-build: _fmt
+build: fmt
   cargo build
 
-run: _fmt
+run: fmt
   cargo run -- --token ${TELEGRAM_TOKEN}
 
-help: _fmt
+help: fmt
   cargo run -- --help
 
 pre-commit:

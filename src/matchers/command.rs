@@ -1,7 +1,4 @@
-use rhai::{
-    Engine,
-    EvalAltResult,
-};
+use rhai::Engine;
 
 use super::Matcher;
 use crate::{

@@ -1,14 +1,10 @@
-use std::collections::HashMap;
 use std::{
     thread,
     time,
 };
 
 use log::info;
-use rhai::{
-    Engine,
-    EvalAltResult,
-};
+use rhai::Engine;
 
 use super::{
     BotAPI,
@@ -36,10 +32,6 @@ fn get_latest_update_id(messages: &Vec<Message,>,) -> i64 {
 pub struct ChatListener {
     api: BotAPI,
     matchers: Vec<Box<dyn Matcher,>,>,
-}
-
-fn foo() {
-    println!("DSSD");
 }
 
 impl ChatListener {
@@ -82,14 +74,7 @@ impl ChatListener {
     }
 
     pub fn long_polling(&self,) -> Result<(), BotErrors,> {
-        let mut rhai_engine = Engine::new();
-        rhai_engine.register_fn(
-            "send_message",
-            |chat_id: i64, reply_to_message_id: i64, text: &str| {
-                println!("text");
-            },
-        );
-
+        let rhai = Engine::new();
         let delay = time::Duration::from_secs(2,);
         let mut massages = self.get_message_updates(None, 16,)?;
         let mut next_update_id = get_latest_update_id(&massages,) + 1;
@@ -110,7 +95,7 @@ impl ChatListener {
             for message in massages.into_iter() {
                 for matcher in &self.matchers {
                     if matcher.is_check(&message,) {
-                        matcher.call(&self.api, &message, &rhai_engine,);
+                        matcher.call(&self.api, &message, &rhai,);
                     };
                 }
             }

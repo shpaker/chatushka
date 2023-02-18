@@ -1,7 +1,4 @@
-use rhai::{
-    Engine,
-    EvalAltResult,
-};
+use rhai::Engine;
 
 use crate::bot::Message;
 use crate::Action;
@@ -16,7 +13,7 @@ impl Action for MessageAction {
         &self,
         api: &BotAPI,
         message: &Message,
-        rhai_engine: &Engine,
+        _rhai_engine: &Engine,
     ) {
         let _ =
             api.send_message(message.chat_id, self.template.as_str(), message.id, 16,);

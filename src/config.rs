@@ -2,10 +2,6 @@ use std::collections::HashMap;
 use std::fs::read_to_string;
 
 use regex::Regex;
-use rhai::{
-    Engine,
-    EvalAltResult,
-};
 use serde::{
     Deserialize,
     Serialize,
@@ -70,7 +66,13 @@ fn make_action(
                 Some(value,) => value.clone(),
                 _ => return Err(ConfigErrors::MissingValue,),
             };
-            Ok(Box::new(RhaiAction { script: script, },),)
+            let entrypoint = args
+                .get("entrypoint",)
+                .unwrap_or(&"main".to_string(),)
+                .clone();
+            Ok(Box::new(RhaiAction {
+                script, entrypoint,
+            },),)
         }
     }
 }
@@ -93,18 +95,6 @@ fn make_matcher(
             },),)
         }
         MatchersKind::Command => {
-            let token = match args.get("token",) {
-                Some(value,) => value.clone(),
-                _ => return Err(ConfigErrors::MissingValue,),
-            };
-            Ok(Box::new(CommandMatcher {
-                token,
-                case_insensitive: true,
-                prefixes: vec!['!', 'z'],
-                action,
-            },),)
-        }
-        _ => {
             let token = match args.get("token",) {
                 Some(value,) => value.clone(),
                 _ => return Err(ConfigErrors::MissingValue,),

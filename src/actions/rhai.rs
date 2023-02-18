@@ -24,12 +24,24 @@ impl Action for RhaiAction {
             .push_constant("CHAT_ID", message.chat_id,)
             .push_constant("MESSAGE_ID", message.id,)
             .push_constant("MESSAGE_TEXT", message.text.clone(),);
-        let result = match rhai_engine
-            .eval_with_scope::<String>(&mut scope, self.script.as_str(),)
-        {
+
+        let ast = rhai_engine.compile(&self.script,).unwrap();
+        let result = match rhai_engine.call_fn::<String>(
+            &mut scope,
+            &ast,
+            self.entrypoint.as_str(),
+            (),
+        ) {
             Ok(message,) => message,
             Err(_err,) => return println!("{:?}", _err),
         };
-        api.send_message(message.chat_id, result.as_str(), message.id, 16,);
+        println!("{:?}", result);
+        let response = result;
+        // let response = match result {
+        //     None => return (),
+        //     Some(response) => response,
+        // };
+        println!("{:?}", response);
+        api.send_message(message.chat_id, response.as_str(), message.id, 16,);
     }
 }

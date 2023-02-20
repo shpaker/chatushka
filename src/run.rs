@@ -2,23 +2,23 @@ use clap::Parser;
 use log::info;
 
 use super::{
-    read_config,
-    ChatListener,
+    init_logger,
+    Bot,
     CliArgs,
+    Config,
 };
-use crate::logger::init_logger;
 
 pub fn run() {
     let cli_args = CliArgs::parse();
     init_logger(cli_args.debug,);
-    info!("starting up {}", cli_args.debug);
-    let matchers = match read_config(cli_args.config.as_str(),) {
-        Err(err,) => panic!("Incorrect config: {:?}!", err),
+    info!("starting up [debug is {}]", cli_args.debug);
+    let bot = Bot::new(cli_args.token.as_str(),);
+    let config = match Config::from_file(cli_args.config.as_str(), &bot.rhai_engine,) {
+        Err(err,) => panic!("incorrect config: {:?}!", err),
         Ok(value,) => value,
     };
-    let listener = ChatListener::new(cli_args.token.as_str(), matchers,);
-    match listener.long_polling() {
-        Err(err,) => panic!("Error happened: {:?}!", err),
+    match bot.run(&config.listeners,) {
+        Err(err,) => panic!("error happened: {:?}!", err),
         Ok(value,) => value,
     };
 }

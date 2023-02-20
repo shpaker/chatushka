@@ -1,47 +1,86 @@
+use log::warn;
 use rhai::{
     Engine,
     Scope,
+    AST,
 };
 
-use crate::bot::Message;
-use crate::Action;
-use crate::BotAPI;
+use super::Action;
+use crate::{
+    ListenerErrors,
+    Message,
+    TelegramAPI,
+};
 
 pub struct RhaiAction {
-    pub script: String,
-    pub entrypoint: String,
+    pub script: AST,
+    pub entrypoint: Option<String,>,
+}
+
+impl RhaiAction {
+    pub fn new(
+        script: &str,
+        entrypoint: Option<String,>,
+        engine: &Engine,
+    ) -> Result<RhaiAction, ListenerErrors,> {
+        let script = match engine.compile(script,) {
+            Ok(script,) => script,
+            Err(_err,) => return Err(ListenerErrors::CompileError,),
+        };
+        Ok(RhaiAction {
+            script, entrypoint,
+        },)
+    }
 }
 
 impl Action for RhaiAction {
     fn call(
         &self,
-        api: &BotAPI,
+        api: &TelegramAPI,
         message: &Message,
         rhai_engine: &Engine,
-    ) {
+    ) -> Result<(), ListenerErrors,> {
         let mut scope = Scope::new();
         scope
             .push_constant("CHAT_ID", message.chat_id,)
             .push_constant("MESSAGE_ID", message.id,)
             .push_constant("MESSAGE_TEXT", message.text.clone(),);
-
-        let ast = rhai_engine.compile(&self.script,).unwrap();
-        let result = match rhai_engine.call_fn::<String>(
-            &mut scope,
-            &ast,
-            self.entrypoint.as_str(),
-            (),
-        ) {
-            Ok(message,) => message,
-            Err(_err,) => return println!("{:?}", _err),
+        let mut result: Option<String,> = None;
+        match &self.entrypoint {
+            None => {
+                match rhai_engine.eval_ast_with_scope(&mut scope, &self.script,) {
+                    Ok(message,) => result = Some(message,),
+                    Err(_err,) => {
+                        warn!("error {:?}", { _err });
+                        return Err(ListenerErrors::CallActionError,);
+                    }
+                };
+            }
+            Some(value,) => {
+                match rhai_engine.call_fn::<String>(
+                    &mut scope,
+                    &self.script,
+                    value,
+                    (),
+                ) {
+                    Ok(message,) => result = Some(message,),
+                    Err(_err,) => {
+                        warn!("error {:?}", { _err });
+                        return Err(ListenerErrors::CallActionError,);
+                    }
+                };
+            }
         };
-        println!("{:?}", result);
-        let response = result;
-        // let response = match result {
-        //     None => return (),
-        //     Some(response) => response,
-        // };
-        println!("{:?}", response);
-        api.send_message(message.chat_id, response.as_str(), message.id, 16,);
+        if result == None {
+            return Ok((),);
+        } else {
+            api.send_message(
+                message.chat_id,
+                result.unwrap().as_str(),
+                message.id,
+                16,
+            );
+        }
+        Ok((),)
     }
 }

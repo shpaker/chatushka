@@ -1,8 +1,11 @@
 use rhai::Engine;
 
-use crate::bot::Message;
-use crate::Action;
-use crate::BotAPI;
+use crate::{
+    Action,
+    ListenerErrors,
+    Message,
+    TelegramAPI,
+};
 
 pub struct MessageAction {
     pub template: String,
@@ -11,11 +14,16 @@ pub struct MessageAction {
 impl Action for MessageAction {
     fn call(
         &self,
-        api: &BotAPI,
+        api: &TelegramAPI,
         message: &Message,
         _rhai_engine: &Engine,
-    ) {
-        let _ =
-            api.send_message(message.chat_id, self.template.as_str(), message.id, 16,);
+    ) -> Result<(), ListenerErrors,> {
+        match api
+            .send_message(message.chat_id, self.template.as_str(), message.id, 16,)
+        {
+            Ok(_result,) => (),
+            Err(_err,) => return Err(ListenerErrors::CallActionError,),
+        };
+        Ok((),)
     }
 }

@@ -1,15 +1,16 @@
 use rhai::Engine;
 
 use crate::{
-    BotAPI,
+    ListenerErrors,
     Message,
+    TelegramAPI,
 };
 
 pub trait Action {
     fn call(
         &self,
-        api: &BotAPI,
+        api: &TelegramAPI,
         message: &Message,
         rhai_engine: &Engine,
-    );
+    ) -> Result<(), ListenerErrors,>;
 }

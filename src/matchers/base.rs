@@ -1,18 +1,7 @@
-use rhai::Engine;
-
-use crate::{
-    BotAPI,
-    Message,
-};
+use crate::Message;
 pub trait Matcher {
-    fn is_check(
+    fn is_match(
         &self,
         message: &Message,
     ) -> bool;
-    fn call(
-        &self,
-        api: &BotAPI,
-        message: &Message,
-        rhai_engine: &Engine,
-    );
 }

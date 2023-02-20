@@ -12,3 +12,9 @@ pub enum ConfigErrors {
     UnknownActionType,
     MissingValue,
 }
+
+#[derive(Debug,)]
+pub enum ListenerErrors {
+    CompileError,
+    CallActionError,
+}

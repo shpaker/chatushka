@@ -1,0 +1,38 @@
+---
+matcher:
+  kind: regex
+  args:
+    rule: \?
+action:
+  kind: rhai
+  args:
+    entrypoint: main
+    script: |
+      fn read_ball8_strings() {
+        let data = open_file("ball8.txt", "r").read_string();
+        return data.split("\n").sample();
+      }
+      fn main() {
+        if rand(0..1) == 3 {
+          return read_ball8_strings();
+        }
+      }
+---
+matcher:
+  kind: command
+  args:
+    token: ping
+action:
+  kind: message
+  args:
+    template: pong
+---
+matcher:
+  kind: command
+  args:
+    token: id
+action:
+  kind: rhai
+  args:
+    script: |
+      "<b>chat_id:</b> <pre>" + to_string(CHAT_ID) + "</pre>"

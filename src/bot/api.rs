@@ -24,13 +24,13 @@ impl APIMethods {
     }
 }
 
-pub struct BotAPI {
+pub struct TelegramAPI {
     api_endpoint: String,
 }
 
-impl BotAPI {
-    pub fn new(token: &str,) -> BotAPI {
-        BotAPI {
+impl TelegramAPI {
+    pub fn new(token: &str,) -> TelegramAPI {
+        TelegramAPI {
             api_endpoint: format!("https://api.telegram.org/bot{}", token,),
         }
     }

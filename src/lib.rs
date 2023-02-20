@@ -1,4 +1,3 @@
-pub use config::read_config;
 pub use logger::init_logger;
 pub use run::run;
 
@@ -7,6 +6,7 @@ mod bot;
 mod cli_args;
 mod config;
 mod errors;
+mod listener;
 mod logger;
 mod matchers;
 mod run;
@@ -18,15 +18,18 @@ pub(crate) use crate::{
         RhaiAction,
     },
     bot::{
-        BotAPI,
-        ChatListener,
+        Bot,
         Message,
+        TelegramAPI,
     },
     cli_args::CliArgs,
+    config::Config,
     errors::{
         BotErrors,
         ConfigErrors,
+        ListenerErrors,
     },
+    listener::Listener,
     matchers::{
         CommandMatcher,
         Matcher,

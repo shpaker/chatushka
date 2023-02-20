@@ -4,15 +4,20 @@ use std::{
 };
 
 use log::info;
-use rhai::Engine;
+use rhai::{
+    packages::Package,
+    Engine,
+};
+use rhai_fs::FilesystemPackage;
+use rhai_rand::RandomPackage;
 
 use super::{
-    BotAPI,
     Message,
+    TelegramAPI,
 };
 use crate::{
     BotErrors,
-    Matcher,
+    Listener,
 };
 
 fn get_latest_update_id(messages: &Vec<Message,>,) -> i64 {
@@ -29,19 +34,20 @@ fn get_latest_update_id(messages: &Vec<Message,>,) -> i64 {
     return latest_update_id;
 }
 
-pub struct ChatListener {
-    api: BotAPI,
-    matchers: Vec<Box<dyn Matcher,>,>,
+pub struct Bot {
+    api: TelegramAPI,
+    pub rhai_engine: Engine,
 }
 
-impl ChatListener {
-    pub fn new(
-        token: &str,
-        matchers: Vec<Box<dyn Matcher,>,>,
-    ) -> ChatListener {
-        ChatListener {
-            api: BotAPI::new(token,),
-            matchers,
+impl Bot {
+    pub fn new(token: &str,) -> Bot {
+        let mut rhai_engine = Engine::new();
+        rhai_engine.register_global_module(RandomPackage::new().as_shared_module(),);
+        let package = FilesystemPackage::new();
+        package.register_into_engine(&mut rhai_engine,);
+        Bot {
+            api: TelegramAPI::new(token,),
+            rhai_engine,
         }
     }
 
@@ -73,8 +79,34 @@ impl ChatListener {
         return Ok(messages,);
     }
 
-    pub fn long_polling(&self,) -> Result<(), BotErrors,> {
-        let rhai = Engine::new();
+    fn process_incoming_messages(
+        &self,
+        messages: &Vec<Message,>,
+        listeners: &Vec<Listener,>,
+    ) {
+        for message in messages.into_iter() {
+            for listener in listeners.iter() {
+                if listener.matcher.is_match(&message,) {
+                    match listener
+                        .action
+                        .call(&self.api, &message, &self.rhai_engine,)
+                    {
+                        Ok(_,) => {
+                            info!("action matched!");
+                        }
+                        Err(err,) => {
+                            info!("action err: {:?}", err);
+                        }
+                    };
+                };
+            }
+        }
+    }
+
+    fn long_polling(
+        &self,
+        listeners: &Vec<Listener,>,
+    ) -> Result<(), BotErrors,> {
         let delay = time::Duration::from_secs(2,);
         let mut massages = self.get_message_updates(None, 16,)?;
         let mut next_update_id = get_latest_update_id(&massages,) + 1;
@@ -92,14 +124,15 @@ impl ChatListener {
                 continue;
             }
             next_update_id = get_latest_update_id(&massages,) + 1;
-            for message in massages.into_iter() {
-                for matcher in &self.matchers {
-                    if matcher.is_check(&message,) {
-                        matcher.call(&self.api, &message, &rhai,);
-                    };
-                }
-            }
+            self.process_incoming_messages(&massages, listeners,);
             thread::sleep(delay,);
         }
+    }
+
+    pub fn run(
+        &self,
+        listeners: &Vec<Listener,>,
+    ) -> Result<(), BotErrors,> {
+        self.long_polling(listeners,)
     }
 }

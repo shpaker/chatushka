@@ -1,7 +1,7 @@
 mod api;
-mod listener;
+mod bot;
 mod responses;
 
-pub use self::api::BotAPI;
-pub use self::listener::ChatListener;
+pub use self::api::TelegramAPI;
+pub use self::bot::Bot;
 pub use self::responses::Message;

@@ -13,7 +13,7 @@ action:
         return data.split("\n").sample();
       }
       fn main() {
-        if rand(0..1) == 3 {
+        if rand(0..5) == 3 {
           return read_ball8_strings();
         }
       }

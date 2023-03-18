@@ -1,21 +1,16 @@
-from chatushka.bot_api import TelegramBotAPI
-from chatushka.listeners import Listener
-from chatushka.matchers import (
-    ChatUsersMovementsEventsEnum,
-    ChatUsersMovementsMatcher,
-    CommandsMatcher,
-    CronMatcher,
-    EventsMatcher,
-    EventTypes,
-    MatcherBase,
-    MatcherProtocol,
-    RegexMatcher,
-)
-from chatushka.models import (
+from chatushka.core.chatushka import Chatushka
+from chatushka.core.matchers.base import MatcherBase
+from chatushka.core.matchers.chat_users_movements import ChatUsersMovementsEventsEnum, ChatUsersMovementsMatcher
+from chatushka.core.matchers.commands import CommandsMatcher
+from chatushka.core.matchers.cron import CronMatcher
+from chatushka.core.matchers.events import EventsMatcher
+from chatushka.core.matchers.regex import RegexMatcher
+from chatushka.core.models import (
     Chat,
     ChatMemberAdministrator,
     ChatMemberOwner,
     ChatPermissions,
+    EventTypes,
     MatchedToken,
     Message,
     MyChatMember,
@@ -25,6 +20,8 @@ from chatushka.models import (
     Update,
     User,
 )
+from chatushka.core.protocols import MatcherProtocol
+from chatushka.core.telegram import Telegram
 
 __all__ = (
     "MatcherBase",
@@ -36,7 +33,7 @@ __all__ = (
     "MatcherProtocol",
     "ChatUsersMovementsMatcher",
     "ChatUsersMovementsEventsEnum",
-    "TelegramBotAPI",
+    "Telegram",
     "User",
     "ChatMemberOwner",
     "ChatMemberAdministrator",
@@ -50,5 +47,5 @@ __all__ = (
     "RegexMatchKwargs",
     "MatchedToken",
     "EventTypes",
-    "Listener",
+    "Chatushka",
 )

@@ -3,10 +3,10 @@ from asyncio import ensure_future, get_event_loop, sleep
 from functools import partial
 from logging import getLogger
 
-from chatushka import CommandsMatcher, EventsMatcher, EventTypes, Listener
+from chatushka import Chatushka, CommandsMatcher, EventsMatcher, EventTypes
 from chatushka.__version__ import __URL__, __VERSION__
-from chatushka.bot_api import TelegramBotAPI
 from chatushka.constants import HTTP_POOLING_DELAY, HTTP_POOLING_TIMEOUT
+from chatushka.core.telegram import Telegram
 from chatushka.models import Message
 from chatushka.utils import check_preconditions
 
@@ -14,9 +14,9 @@ logger = getLogger(__name__)
 
 
 async def _message_handler(
-    bot_instance: Listener,
+    bot_instance: Chatushka,
     message: Message,
-    api: TelegramBotAPI,
+    api: Telegram,
 ) -> None:
     await api.send_message(
         chat_id=message.chat.id,
@@ -27,7 +27,7 @@ async def _message_handler(
     )
 
 
-class Listener(EventsMatcher):
+class Chatushka(EventsMatcher):
     def __init__(
         self,
         token: str,
@@ -38,7 +38,7 @@ class Listener(EventsMatcher):
 
         self.title = title or self.__class__.__name__
         self.debug = debug
-        self.api = TelegramBotAPI(token)
+        self.api = Telegram(token)
         self.add_handler(EventTypes.STARTUP, check_preconditions, include_in_help=False)
 
         bot_commands_matcher = CommandsMatcher(prefixes=("!", "/"))

@@ -1,10 +1,8 @@
 from random import choice
 
-from bot.internal.data_dir import read_txt_from_data_dir
-from bot.settings import get_settings
-from chatushka.core.matchers import CommandsMatcher
-from chatushka.core.transports import Message
-from chatushka.core.transports import TelegramBotApi
+from chatushka import CommandsMatcher, Message, Telegram
+from chatushka.bot.internal.data_dir import read_txt_from_data_dir
+from chatushka.bot.settings import get_settings
 
 settings = get_settings()
 lukashenko_matcher = CommandsMatcher(
@@ -20,7 +18,7 @@ lukashenko_matcher = CommandsMatcher(
     help_message="Quotes by Alexander G. Lukashenko",
 )
 async def lukashenko_handler(
-    api: TelegramBotApi,
+    api: Telegram,
     message: Message,
 ) -> None:
     quotes = read_txt_from_data_dir("lukashenko.txt")

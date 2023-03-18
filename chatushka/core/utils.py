@@ -1,8 +1,8 @@
-from chatushka.bot_api import TelegramBotAPI
+from chatushka.core.telegram import Telegram
 
 
 async def check_preconditions(
-    api: TelegramBotAPI,
+    api: Telegram,
 ) -> None:
     response = await api.get_me()
     if not response.can_join_groups:

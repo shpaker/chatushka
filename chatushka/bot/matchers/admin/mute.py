@@ -1,11 +1,9 @@
 from datetime import timedelta
 from random import randrange
 
-from bot.internal.mute import send_mute_request
-from bot.settings import get_settings
-from chatushka.core.matchers import CommandsMatcher
-from chatushka.core.telegram.api import TelegramBotAPI
-from chatushka.core.telegram.models import Message
+from chatushka import CommandsMatcher, Message, Telegram
+from chatushka.bot.matchers.admin.utils import send_mute_request
+from chatushka.bot.settings import get_settings
 
 settings = get_settings()
 mute_matcher = CommandsMatcher(
@@ -14,9 +12,9 @@ mute_matcher = CommandsMatcher(
 )
 
 
-@mute_matcher("mute", "shutup")
+@mute_matcher("mute", "shutup", "kill")
 async def mute_handler(
-    api: TelegramBotAPI,
+    api: Telegram,
     message: Message,
     args: list[str],
 ) -> None:
@@ -44,7 +42,7 @@ async def mute_handler(
         )
         return
 
-    try:
+    try:  # noqa
         restrict_time = timedelta(hours=int(args[0]))
     except (ValueError, IndexError):
         pass

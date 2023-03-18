@@ -1,6 +1,5 @@
 from functools import lru_cache
 from pathlib import Path
-from typing import Union
 
 from pydantic import BaseSettings
 
@@ -10,8 +9,8 @@ BOT_DATA_DIR = BOT_ROOT_DIR / "data"
 
 
 class _Settings(BaseSettings):
-    command_prefixes: Union[str, tuple[str, ...]] = ("/", "!")
-    command_postfixes: Union[str, tuple[str, ...]] = "!"
+    command_prefixes: str | tuple[str, ...] = ("/", "!")
+    command_postfixes: str | tuple[str, ...] = "!"
 
     class Config:
         env_prefix = "BOT_"

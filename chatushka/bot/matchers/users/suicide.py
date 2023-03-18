@@ -1,10 +1,8 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from random import randrange
 
-from bot.settings import get_settings
-from chatushka.core.matchers import CommandsMatcher
-from chatushka.core.transports import ChatPermissions, Message
-from chatushka.core.transports import TelegramBotApi
+from chatushka import ChatPermissions, CommandsMatcher, Message, Telegram
+from chatushka.bot.settings import get_settings
 
 settings = get_settings()
 suicide_matcher = CommandsMatcher(
@@ -15,7 +13,7 @@ suicide_matcher = CommandsMatcher(
 
 @suicide_matcher("suicide", "wtf")
 async def suicide_handler(
-    api: TelegramBotApi,
+    api: Telegram,
     message: Message,
 ) -> None:
     restrict_time = timedelta(minutes=randrange(1, 4 * 60))
@@ -29,7 +27,7 @@ async def suicide_handler(
                 can_send_polls=False,
                 can_send_other_messages=False,
             ),
-            until_date=datetime.now(tz=timezone.utc) + restrict_time,
+            until_date=datetime.now(tz=UTC) + restrict_time,
         )
     except ValueError:
         is_success = False
@@ -38,7 +36,7 @@ async def suicide_handler(
             chat_id=message.chat.id,
             text=f"Пользователь {message.user.readable_name} самовыпилился на {restrict_time}",
         )
-        return None
+        return
     await api.send_message(
         chat_id=message.chat.id,
         text=f"Лапки коротковаты чтоб убить {message.user.readable_name}",

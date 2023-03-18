@@ -1,7 +1,7 @@
-from bot.matchers.admin.mute import mute_matcher
-from bot.matchers.admin.pin import pin_matcher
-from bot.settings import get_settings
-from chatushka.core.matchers import CommandsMatcher
+from chatushka import CommandsMatcher
+from chatushka.bot.matchers.admin.mute import mute_matcher
+from chatushka.bot.matchers.admin.pin import pin_matcher
+from chatushka.bot.settings import get_settings
 
 settings = get_settings()
 admin_matcher = CommandsMatcher(

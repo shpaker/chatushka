@@ -5,8 +5,8 @@ from collections.abc import Callable, Hashable, Iterable
 from inspect import signature
 from typing import Any, NamedTuple
 
-from chatushka import MatcherProtocol, TelegramBotAPI
-from chatushka.models import HANDLER_TYPING, MatchedToken, Update
+from chatushka import MatcherProtocol, Telegram
+from chatushka.core.models import HANDLER_TYPING, MatchedToken, Update
 
 
 class HelpMessage(NamedTuple):
@@ -79,7 +79,7 @@ class MatcherBase(ABC):  # noqa
 
     async def match(
         self,
-        api: TelegramBotAPI,
+        api: Telegram,
         update: Update,
         *,
         should_call_matched: bool = False,
@@ -101,7 +101,7 @@ class MatcherBase(ABC):  # noqa
 
     async def call(
         self,
-        api: TelegramBotAPI,
+        api: Telegram,
         token: Hashable,
         update: Update | None = None,
         kwargs: dict[str, Any] | None = None,

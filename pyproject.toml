@@ -7,6 +7,9 @@ readme = "readme.md"
 homepage = "https://github.com/shpaker/chatushka"
 repository = "https://github.com/shpaker/chatushka"
 
+[tool.poetry.scripts]
+makeqr = 'chatushka.bot.__main__:main'
+
 [tool.poetry.dependencies]
 python = "^3.11.0"
 httpx = "^0.23.3"

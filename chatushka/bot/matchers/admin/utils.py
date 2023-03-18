@@ -1,10 +1,10 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from enum import Enum
 from random import choice
 
-from bot.settings import get_settings
+from chatushka.bot.settings import get_settings
+from chatushka.core.telegram import Telegram
 from chatushka.matchers.commands import CommandsMatcher
-from chatushka.bot_api import TelegramBotAPI
 from chatushka.models import ChatPermissions, Message, User
 
 RESTRICT_PERMISSION = ChatPermissions(
@@ -37,7 +37,7 @@ class MuteMessages(Enum):
 
 
 async def send_mute_request(
-    api: TelegramBotAPI,
+    api: Telegram,
     message: Message,
     initiator: User,
     restrict_user: User,
@@ -48,7 +48,7 @@ async def send_mute_request(
         chat_id=message.chat.id,
         user_id=restrict_user.id,
         permissions=RESTRICT_PERMISSION,
-        until_date=datetime.now(tz=timezone.utc) + restrict_time,
+        until_date=datetime.now(tz=UTC) + restrict_time,
     )
     if is_success:
         await api.send_message(

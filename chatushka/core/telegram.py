@@ -18,7 +18,7 @@ from chatushka.models import (
 logger = getLogger()
 
 
-class TelegramBotAPI:
+class Telegram:
     def __init__(
         self,
         token: str,

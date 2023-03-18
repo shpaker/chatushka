@@ -3,18 +3,10 @@ from logging import DEBUG, INFO, WARNING, basicConfig, getLogger
 
 from click import command, option
 
-from chatushka import ChatushkaBot
-from bot.matchers import (
-    admin_matcher,
-    eight_ball_matcher,
-    helpers_matcher,
-    jokes_matcher,
-    lukashenko_matcher,
-    philosophy_matcher,
-    suicide_matcher,
-    welcoming_matcher,
-)
-from bot.settings import get_settings
+from chatushka import Chatushka
+from chatushka.bot.matchers.admin import admin_matcher
+from chatushka.bot.matchers.users import user_matcher
+from chatushka.bot.settings import get_settings
 
 logger = getLogger()
 settings = get_settings()
@@ -23,19 +15,13 @@ settings = get_settings()
 def make_bot(
     token: str,
     debug: bool,
-) -> ChatushkaBot:
-    instance = ChatushkaBot(token=token, debug=debug)
-    instance.add_matcher(
+) -> Chatushka:
+    bot = Chatushka(token=token, debug=debug)
+    bot.add_matcher(
         admin_matcher,
-        jokes_matcher,
-        eight_ball_matcher,
-        helpers_matcher,
-        suicide_matcher,
-        lukashenko_matcher,
-        welcoming_matcher,
-        philosophy_matcher,
+        user_matcher,
     )
-    return instance
+    return bot
 
 
 @command()

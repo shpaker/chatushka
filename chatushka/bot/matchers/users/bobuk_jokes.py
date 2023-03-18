@@ -1,9 +1,7 @@
 from httpx import AsyncClient
 
-from bot.settings import BOBUK_JOKES_URL, get_settings
-from chatushka.core.matchers import CommandsMatcher
-from chatushka.core.transports import Message
-from chatushka.core.transports import TelegramBotApi
+from chatushka import CommandsMatcher, Message, Telegram
+from chatushka.bot.settings import BOBUK_JOKES_URL, get_settings
 
 settings = get_settings()
 jokes_matcher = CommandsMatcher(
@@ -14,7 +12,7 @@ jokes_matcher = CommandsMatcher(
 
 @jokes_matcher("jokes", "joke")
 async def jokes_handler(
-    api: TelegramBotApi,
+    api: Telegram,
     message: Message,
 ) -> None:
     async with AsyncClient() as client:  # type: AsyncClient

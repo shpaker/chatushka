@@ -1,9 +1,7 @@
 from asyncio import sleep
 
-from bot.settings import get_settings
-from chatushka.core.matchers import CommandsMatcher
-from chatushka.core.transports import Message
-from chatushka.core.transports import TelegramBotApi
+from chatushka import CommandsMatcher, Message, Telegram
+from chatushka.bot.settings import get_settings
 
 settings = get_settings()
 pin_matcher = CommandsMatcher(
@@ -14,7 +12,7 @@ pin_matcher = CommandsMatcher(
 
 @pin_matcher("pin")
 async def pin_handler(
-    api: TelegramBotApi,
+    api: Telegram,
     message: Message,
     args: list[str],
 ) -> None:
@@ -49,7 +47,7 @@ async def pin_handler(
 
 @pin_matcher("unpin")
 async def unpin_handler(
-    api: TelegramBotApi,
+    api: Telegram,
     message: Message,
 ) -> None:
     await api.unpin_chat_message(

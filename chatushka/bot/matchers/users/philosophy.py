@@ -1,9 +1,7 @@
 from random import randrange
 
-from bot.settings import get_settings
-from chatushka.core.matchers import CommandsMatcher, RegexMatcher
-from chatushka.core.transports import Message
-from chatushka.core.transports import TelegramBotApi
+from chatushka import CommandsMatcher, Message, RegexMatcher, Telegram
+from chatushka.bot.settings import get_settings
 
 _RESPONSE = "Зависит от контекста"
 
@@ -17,9 +15,9 @@ philosophy_matcher = RegexMatcher()
 
 @philosophy_matcher(r"([/!]$)")
 async def exclamation_handler(
-    api: TelegramBotApi,
+    api: Telegram,
     message: Message,
-    matched: list[str],  # noqa, pylint: disable=unused-argument
+    matched: list[str],  # pylint: disable=unused-argument
 ) -> None:
     rand_int = randrange(16)
     if rand_int == 1:
@@ -32,9 +30,9 @@ async def exclamation_handler(
 
 @philosophy_matcher(r"((\s|^)(([\d]*|[а-яА-Я]*) это много/?)|((\s|^)Is ([\d]*|[a-zA-Z]*) a lot/?))")
 async def philosophy_handler(
-    api: TelegramBotApi,
+    api: Telegram,
     message: Message,
-    matched: list[str],  # noqa, pylint: disable=unused-argument
+    matched: list[str],  # pylint: disable=unused-argument
 ) -> None:
     rand_int = randrange(4)
     if rand_int == 1:

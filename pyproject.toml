@@ -1,29 +1,39 @@
 [tool.poetry]
 name = "chatushka"
-version = "$__VERSION__"
+version = "0.1.0"
 description = "Bot that can make your chat explode!"
 authors = ["Aleksandr Shpak <shpaker@gmail.com>"]
 readme = "readme.md"
-homepage = "$__URL__"
-repository = "$__URL__"
+homepage = "https://github.com/shpaker/chatushka"
+repository = "https://github.com/shpaker/chatushka"
 
 [tool.poetry.dependencies]
-python = "^3.9"
-click = "^8.0.1"
-httpx = "^0.22.0"
-pydantic = {extras = ["dotenv"], version = "^1.8.2"}
-aiocron = "^1.6"
-motor = "^2.5.0"
-PyYAML = "^6.0"
+python = "^3.11.0"
+httpx = "^0.23.3"
 
-[tool.poetry.dev-dependencies]
-pytest = "^7.0.1"
-isort = "^5.9.2"
-black = "^22.1.0"
-flake8 = "^4.0.1"
-pylint = "^2.9.3"
-mypy = "^0.931"
+[tool.poetry.group.core.dependencies]
+aiocron = {version = "^1.8", optional = true}
+pydantic = {extras = ["dotenv"], version = "^1.8.2"}
+
+[tool.poetry.group.bot]
+optional = true
+
+[tool.poetry.group.bot.dependencies]
+click = "^8.0.1"
+pyyaml = "^6.0"
+
+[tool.poetry.group.dev.dependencies]
+poetry-plugin-sort = "^0.1.1"
 pre-commit = "^2.13.0"
+
+[tool.poetry.group.linters.dependencies]
+black = "^23.1.0"
+isort = "^5.12.0"
+mypy = "^1.1.1"
+ruff = "^0.0.257"
+
+[tool.poetry.group.tests.dependencies]
+pytest = "^7.2.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -55,16 +65,80 @@ line_length = 120
 src_paths = ["chatushka", "tests"]
 skip = [".mypy_cache", ".pytest_cache", "venv"]
 
-[tool.pylint.messages_control]
-disable = "missing-docstring,logging-fstring-interpolation,too-few-public-methods,too-many-arguments,duplicate-code"
-extend-ignore = "E203,W503"
+[tool.mypy]
+python_version = 3.11
+plugins = [
+  "pydantic.mypy"
+]
+ignore_missing_imports = true
+follow_imports = "silent"
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+no_implicit_reexport = true
 
-[tool.pylint.format]
-max-line-length = "120"
-indent-string = "    "
-good-names = "db, i, x, y, T, fh"
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+ignore = [
+  "RUF001",  # String contains ambiguous unicode character
+  "RUF002",  # String contains ambiguous unicode character
+  "RUF003",  # String contains ambiguous unicode character
+  "ANN101",  # Missing type annotation for `self` in method
+  "ANN102",  # Missing type annotation for `cls` in classmethod
+  "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed in `**kwargs`
+  "G004",    # Logging statement uses f-string
+#  "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed"
+#  "PLR2004", # Magic value used in comparison, consider replacing 11 with a constant variable
+#  "RUF100",  # Unused blanket `noqa` directive
+]
+select = [
+   "F",  # Pyflakes
+   "E",  # pycodestyle
+ "C90",  # mccabe
+   "I",  # isort
+   "N",  # pep8-naming
+#   "D",  # pydocstyle
+  "UP",  # pyupgrade
+ "YTT",  # flake8-2020
+ "ANN",  # flake8-annotations
+   "S",  # flake8-bandit
+ "BLE",  # flake8-blind-except
+# "FBT",  # flake8-boolean-trap
+   "B",  # flake8-bugbear
+#   "A",  # flake8-builtins
+ "COM",  # flake8-commas
+  "C4",  # flake8-comprehensions
+ "DTZ",  # flake8-datetimez
+ "T10",  # flake8-debugger
+#  "EM",  # flake8-errmsg
+ "EXE",  # flake8-executable
+ "ISC",  # flake8-implicit-str-concat
+ "ICN",  # flake8-import-conventions
+   "G",  # flake8-logging-format
+ "INP",  # flake8-no-pep420
+ "PIE",  # flake8-pie
+ "T20",  # flake8-print
+#  "PT",  # flake8-pytest-style
+   "Q",  # flake8-quotes
+ "RET",  # flake8-return
+ "SIM",  # flake8-simplify
+ "TID",  # flake8-tidy-imports
+ "TCH",  # flake8-type-checking
+# "ARG",  # flake8-unused-arguments
+ "PTH",  # flake8-use-pathlib
+ "ERA",  # eradicate
+#  "PD",  # pandas-vet
+# "PGH",  # pygrep-hooks
+#  "PL",  # Pylint
+# "TRY",  # tryceratops
+ "RSE",  # flake8-raise
+ "SLF",  # flake8-self
+ "RUF",  # Ruff-specific rules
+]
 
-[tool.pylint.master]
-ignore = "venv,tests"
-indent-string = "    "
-extension-pkg-whitelist = "pydantic"
+[tool.ruff.mccabe]
+max-complexity = 20

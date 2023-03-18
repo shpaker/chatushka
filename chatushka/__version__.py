@@ -1,2 +1,2 @@
-__VERSION__ = "$__VERSION__"
-__URL__ = "$__URL__"
+__VERSION__ = "0.1.0"
+__URL__ = "https://github.com/shpaker/chatushka"

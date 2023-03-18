@@ -2,39 +2,28 @@ repos:
   -
     repo: local
     hooks:
-      -
-        id: isort
+      - id: isort
         name: isort
         entry: isort
         language: system
         files: ^(chatushka|tests)/.+\.py$
-      -
-        id: black
+      - id: black
         name: black
         entry: black
         language: system
         files: ^(chatushka|tests)/.+\.py$
-      -
-        id: flake8
-        name: flake8
-        entry: flake8
+      - id: ruff
+        name: ruff
+        entry: ruff check --fix
         language: system
         files: ^(chatushka|tests)/.+\.py$
-      -
-        id: pylint
-        name: pylint
-        entry: pylint
-        language: system
-        files: ^(chatushka|tests)/.+\.py$
-#      -
-#        id: mypy
+#      - id: mypy
 #        name: mypy
 #        entry: mypy
 #        language: system
-#        files: ^(twowires|tests)/.+\.py$
-  -
-    repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: "v3.4.0"
+#        files: ^(chatushka|tests)/.+\.py$
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: "v4.4.0"
     hooks:
       - id: check-added-large-files
       - id: check-json

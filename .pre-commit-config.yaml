@@ -17,11 +17,11 @@ repos:
         entry: ruff check --fix
         language: system
         files: ^(chatushka|tests)/.+\.py$
-#      - id: mypy
-#        name: mypy
-#        entry: mypy
-#        language: system
-#        files: ^(chatushka|tests)/.+\.py$
+      - id: mypy
+        name: mypy
+        entry: mypy
+        language: system
+        files: ^(chatushka|tests)/.+\.py$
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: "v4.4.0"
     hooks:

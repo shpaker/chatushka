@@ -1,10 +1,11 @@
 from contextlib import suppress
 from logging import getLogger
 
+from chatushka.core.matchers.base import MatcherBase
+
 with suppress(ImportError):
     from aiocron import crontab
 
-from chatushka.matchers.base import MatcherBase
 
 logger = getLogger(__name__)
 

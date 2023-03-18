@@ -1,9 +1,8 @@
 from logging import getLogger
 from re import findall
 
-from chatushka.core.models import MatchedToken, RegexMatchKwargs
-from chatushka.core.telegram.models import Update
-from chatushka.matchers.base import MatcherBase
+from chatushka.core.matchers.base import MatcherBase
+from chatushka.core.models import MatchedToken, RegexMatchKwargs, Update
 
 logger = getLogger(__name__)
 

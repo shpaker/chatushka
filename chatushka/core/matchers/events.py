@@ -1,9 +1,8 @@
 from collections.abc import Hashable, Iterable
 from logging import getLogger
 
-from chatushka.core.models import EventTypes, MatchedToken
-from chatushka.core.telegram.models import Update
-from chatushka.matchers.base import MatcherBase
+from chatushka.core.matchers.base import MatcherBase
+from chatushka.core.models import EventTypes, MatchedToken, Update
 
 logger = getLogger(__name__)
 

@@ -1,6 +1,7 @@
 from collections.abc import Hashable, Iterable
 
-from chatushka import MatchedToken, MatcherBase, Update
+from chatushka.core.matchers.base import MatcherBase
+from chatushka.core.models import MatchedToken, Update
 
 
 class CommandsMatcher(MatcherBase):

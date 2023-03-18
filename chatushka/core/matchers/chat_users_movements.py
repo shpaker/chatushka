@@ -2,9 +2,8 @@ from collections.abc import Hashable
 from enum import Enum, auto, unique
 from logging import getLogger
 
-from chatushka.core.models import MatchedToken
-from chatushka.core.transports import Update
-from chatushka.matchers.base import MatcherBase
+from chatushka.core.matchers.base import MatcherBase
+from chatushka.core.models import MatchedToken, Update
 
 logger = getLogger(__name__)
 

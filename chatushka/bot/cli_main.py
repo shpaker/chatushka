@@ -1,8 +1,6 @@
 from asyncio import run
 from logging import DEBUG, INFO, WARNING, basicConfig, getLogger
 
-from click import command, option
-
 from chatushka import Chatushka
 from chatushka.bot.matchers.admin import admin_matcher
 from chatushka.bot.matchers.users import user_matcher
@@ -24,16 +22,6 @@ def make_bot(
     return bot
 
 
-@command()
-@option(
-    "--token",
-    "-t",
-    required=True,
-)
-@option(
-    "--debug/--no-debug",
-    is_flag=True,
-)
 def cli_main(
     token: str,
     debug: bool,

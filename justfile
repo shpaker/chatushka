@@ -11,6 +11,6 @@ ruff:
 linters: format ruff
 
 tests:
-  echo foo
+  poetry run pytest --junitxml=report.xml -vv ${TESTS_DIR}/
 
 ci: linters tests

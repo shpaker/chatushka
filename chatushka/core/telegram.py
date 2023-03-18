@@ -5,7 +5,7 @@ from typing import Any
 from httpx import AsyncClient, Response
 from pydantic import ValidationError
 
-from chatushka.models import (
+from chatushka.core.models import (
     ChatMemberAdministrator,
     ChatMemberOwner,
     ChatMemberStatuses,

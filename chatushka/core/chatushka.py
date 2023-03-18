@@ -3,18 +3,18 @@ from asyncio import ensure_future, get_event_loop, sleep
 from functools import partial
 from logging import getLogger
 
-from chatushka import Chatushka, CommandsMatcher, EventsMatcher, EventTypes
 from chatushka.__version__ import __URL__, __VERSION__
-from chatushka.constants import HTTP_POOLING_DELAY, HTTP_POOLING_TIMEOUT
+from chatushka.core.constants import HTTP_POOLING_DELAY, HTTP_POOLING_TIMEOUT
+from chatushka.core.matchers import CommandsMatcher, EventsMatcher
+from chatushka.core.models import EventTypes, Message
 from chatushka.core.telegram import Telegram
-from chatushka.models import Message
-from chatushka.utils import check_preconditions
+from chatushka.core.utils import check_preconditions
 
 logger = getLogger(__name__)
 
 
 async def _message_handler(
-    bot_instance: Chatushka,
+    bot_instance: "Chatushka",
     message: Message,
     api: Telegram,
 ) -> None:
@@ -51,7 +51,7 @@ class Chatushka(EventsMatcher):
 
     @property
     def help_message_text(self) -> str:
-        output = f"*CHATUSHKA BOT {__VERSION__}*\n`/powered by {__URL__}/`"
+        output = f"*CHATUSHKA BOT {__VERSION__}*\n{__URL__}"
         for help_message in self.help_messages:
             output += f"\n\n*{', '.join(help_message.tokens)}*\n> {help_message.message}"
         return output

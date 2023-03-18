@@ -1,8 +1,8 @@
 from collections.abc import Callable, Coroutine, Hashable, Iterable
 from typing import Any, Protocol
 
-from chatushka.core.models import HANDLER_TYPING, MatchedToken
-from chatushka.core.transports import Message, TelegramBotApi
+from chatushka.core.models import HANDLER_TYPING, MatchedToken, Message
+from chatushka.core.telegram import Telegram
 
 
 class MatcherProtocol(Protocol):
@@ -29,14 +29,14 @@ class MatcherProtocol(Protocol):
 
     async def match(
         self,
-        api: TelegramBotApi,
+        api: Telegram,
         message: Message,
     ) -> MatchedToken:
         ...
 
     async def call(
         self,
-        api: TelegramBotApi,
+        api: Telegram,
         token: Hashable,
         message: Message | None = None,
         kwargs: dict[str, Any] | None = None,

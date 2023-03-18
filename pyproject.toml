@@ -13,8 +13,6 @@ makeqr = 'chatushka.__main__:main'
 [tool.poetry.dependencies]
 python = "^3.11.0"
 httpx = "^0.23.3"
-
-[tool.poetry.group.core.dependencies]
 aiocron = {version = "^1.8", optional = true}
 pydantic = {extras = ["dotenv"], version = "^1.8.2"}
 

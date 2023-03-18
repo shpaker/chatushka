@@ -10,7 +10,7 @@ from chatushka.core.models import HANDLER_TYPING, MatchedToken, Update
 
 
 class HelpMessage(NamedTuple):
-    tokens: tuple[str]
+    tokens: tuple[str, ...]
     message: str | None
 
 

@@ -10,13 +10,14 @@ env:
   POETRY_VERSION: "1.4.0"
 
 jobs:
-
   lint:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         JUST_COMMAND:
-          - linters
+          - format
+          - mypy
+          - ruff
           - tests
     steps:
       - uses: actions/setup-python@v2

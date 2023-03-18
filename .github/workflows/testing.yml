@@ -15,9 +15,7 @@ jobs:
     strategy:
       matrix:
         JUST_COMMAND:
-          - format
-          - mypy
-          - ruff
+          - linters
           - tests
     steps:
       - uses: actions/setup-python@v2
@@ -25,7 +23,6 @@ jobs:
           python-version: "3.11"
       - uses: actions/checkout@v2
       - uses: extractions/setup-just@v1
-      - run: |
-          python -m pip install poetry==${POETRY_VERSION}
-          poetry install -vvv --no-root --only=main,${{ matrix.JUST_COMMAND }}
+      - run: python -m pip install poetry==${POETRY_VERSION}
+      - run: poetry install -vvv --no-root --only=main,${{ matrix.JUST_COMMAND }}
       - run: just ${{ matrix.JUST_COMMAND }}

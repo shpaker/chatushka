@@ -13,7 +13,7 @@ ruff:
 
 linters: format ruff mypy
 
-tests:
+pytest:
   poetry run pytest --junitxml=report.xml -vv {{ TESTS_DIR }}
 
-ci: linters tests
+ci: linters pytest

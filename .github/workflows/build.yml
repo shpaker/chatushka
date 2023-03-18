@@ -17,7 +17,7 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: "3.11"
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - shell: bash
         run: |
           echo "##[set-output name=name;]$(echo ${GITHUB_REPOSITORY#*/})"
@@ -46,7 +46,7 @@ jobs:
     env:
       REGISTRY_HOST: ghcr.io
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - shell: bash
         run: |
           echo "##[set-output name=name;]$(echo ${GITHUB_REPOSITORY#*/})"
@@ -61,9 +61,8 @@ jobs:
           export REPO_URL=${GITHUB_SERVER_URL}/${{ github.repository }}
           sed -i 's,0.0.0,${{ steps.extract_name_and_version.outputs.ver }},g' pyproject.toml
           sed -i 's,0.0.0,${{ steps.extract_name_and_version.outputs.ver }},g' ${VERSION_PY_PATH}
-      - uses: docker/setup-qemu-action@v1
-      - uses: docker/setup-buildx-action@v1
-      - uses: docker/login-action@v1
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY_HOST }}
           username: ${{ github.actor }}
@@ -73,6 +72,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
+          build-args: chatushka_version=${{ steps.extract_name_and_version.outputs.ver }}
           tags: |
             "${{ env.REGISTRY_HOST }}/${{ github.repository }}:latest"
             "${{ env.REGISTRY_HOST }}/${{ github.repository }}:${{ steps.extract_name_and_version.outputs.sha }}"

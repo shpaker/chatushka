@@ -1,6 +1,4 @@
 ---
-name: Testing
-
 on:
   pull_request:
     branches:
@@ -8,7 +6,6 @@ on:
 
 env:
   POETRY_VERSION: "1.4.0"
-  JUST_VERSION: "0.9.4"
 
 jobs:
 
@@ -25,8 +22,6 @@ jobs:
           python-version: "3.11"
       - uses: actions/checkout@v2
       - uses: extractions/setup-just@v1
-        with:
-          just-version: ${JUST_VERSION}
       - run: |
           python -m pip install poetry==${POETRY_VERSION}
           poetry install -vvv --no-root --only=main,${{ matrix.JUST_COMMAND }}

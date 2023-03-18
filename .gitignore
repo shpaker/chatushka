@@ -1,6 +1,7 @@
 .env
 .test_data/
 .idea/
+report.xml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -128,6 +129,9 @@ venv.bak/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+# ruff
+.ruff_cache/
 
 # Pyre type checker
 .pyre/

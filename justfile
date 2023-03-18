@@ -1,5 +1,5 @@
 SOURCE_DIR := "chatushka/"
-TESTS_DIR := "chatushka/"
+TESTS_DIR := "tests/"
 
 format:
   poetry run isort {{ SOURCE_DIR }} {{ TESTS_DIR }}
@@ -11,6 +11,6 @@ ruff:
 linters: format ruff
 
 tests:
-  poetry run pytest --junitxml=report.xml -vv ${TESTS_DIR}/
+  poetry run pytest --junitxml=report.xml -vv {{ TESTS_DIR }}
 
 ci: linters tests

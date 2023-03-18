@@ -3,7 +3,7 @@ name = "chatushka"
 version = "0.1.0"
 description = "Bot that can make your chat explode!"
 authors = ["Aleksandr Shpak <shpaker@gmail.com>"]
-readme = "readme.md"
+readme = "README.md"
 homepage = "https://github.com/shpaker/chatushka"
 repository = "https://github.com/shpaker/chatushka"
 

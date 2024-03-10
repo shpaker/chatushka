@@ -112,7 +112,6 @@ class MatcherBase(
         self,
     ) -> None:
         super().__init__()
-        ...
 
     def __call__(
         self,
@@ -157,15 +156,16 @@ class CommandMatcher(
 ):
     def __init__(
         self,
-        prefix: str = "",
+        prefixes: str | list[str] = "",
         *,
         case_sensitive: bool = False,
     ) -> None:
         super().__init__()
-        prefix = prefix.strip()
+        if isinstance(prefixes, str):
+            prefixes = [prefixes]
         if case_sensitive:
-            prefix = prefix.lower()
-        self._prefix = prefix
+            prefixes = [prefix.upper() for prefix in prefixes]
+        self._prefixes = prefixes
         self._case_sensitive = case_sensitive
 
     def check_condition(
@@ -175,13 +175,11 @@ class CommandMatcher(
     ) -> bool:
         if not update.message or not update.message.text:
             return False
-        token = self._prefix + token
-        for word in update.message.text.split(" "):
-            if not word:
-                continue
-            if self._case_sensitive and token.lower() == word.lower():
+        for prefix in self._prefixes:
+            with_prefix = prefix + token
+            if self._case_sensitive and update.message.text.upper().startswith(with_prefix.upper()):
                 return True
-            if token == word:
+            if update.message.text.startswith(with_prefix):
                 return True
         return False
 

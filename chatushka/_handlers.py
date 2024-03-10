@@ -1,3 +1,6 @@
+from contextlib import suppress
+
+from chatushka._errors import ChatushkaResponseError
 from chatushka._models import Message
 from chatushka._transport import TelegramBotAPI
 
@@ -6,9 +9,11 @@ async def id_handler(
     api: TelegramBotAPI,
     message: Message,
 ) -> None:
-    admins = await api.get_chat_administrators(
-        chat_id=message.chat.id,
-    )
+    admins = []
+    with suppress(ChatushkaResponseError):
+        admins = await api.get_chat_administrators(
+            chat_id=message.chat.id,
+        )
     line_tmpl = "{id_type}: <pre>{id_value}</pre>"
     ids = {"user_id": message.user.id}
     for admin in admins:

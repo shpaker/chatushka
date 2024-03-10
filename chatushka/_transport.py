@@ -4,7 +4,7 @@ from typing import Any, Literal
 from httpx import AsyncClient, Response
 
 from chatushka._constants import HTTP_REGULAR_TIMEOUT
-from chatushka._errors import UshkoResponseError
+from chatushka._errors import ChatushkaResponseError
 from chatushka._models import (
     ChatMemberAdministrator,
     ChatMemberOwner,
@@ -17,22 +17,27 @@ from chatushka._models import (
 async def _raise_on_api_error_response_event_hook(
     response: Response,
 ) -> None:
-    response.raise_for_status()
     await response.aread()
+    if not response.is_success:
+        raise ChatushkaResponseError(
+            response=response,
+        )
     data: dict[str, Any] = response.json()
     if data.get("ok", False) is False or data.get("result") is None:
-        raise UshkoResponseError(
+        raise ChatushkaResponseError(
             response=response,
         )
 
 
 class TelegramBotAPI:
+    _offsets: dict[str, int] = {}  # noqa
+
     def __init__(
         self,
         token: str,
         timeout: int = HTTP_REGULAR_TIMEOUT,
     ) -> None:
-        self._latest_update_id: int | None = None
+        self._token = token
         self._client = AsyncClient(
             base_url=f"https://api.telegram.org/bot{token}",
             event_hooks={  # type: ignore
@@ -76,9 +81,7 @@ class TelegramBotAPI:
     async def get_updates(
         self,
     ) -> list[Update]:
-        offset: int | None = None
-        if self._latest_update_id is not None:
-            offset = self._latest_update_id + 1
+        offset: int | None = self._offsets.get(self._token)
         params = {} if not offset else {"offset": offset}
         if self._timeout:
             params["timeout"] = self._timeout
@@ -89,7 +92,7 @@ class TelegramBotAPI:
                 **params,
             )
         ]
-        self._latest_update_id = results[-1].update_id
+        self.__class__._offsets[self._token] = results[-1].update_id + 1  # noqa
         return results
 
     async def send_message(

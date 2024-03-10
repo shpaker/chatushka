@@ -1,17 +1,17 @@
 from httpx import Response
 
 
-class UshkoError(
+class ChatushkaError(
     Exception,
 ):
     pass
 
 
-class UshkoResponseError(
-    UshkoError,
+class ChatushkaResponseError(
+    ChatushkaError,
 ):
     def __init__(
         self,
         response: Response,
     ) -> None:
-        super().__init__(f'Telegram response error: {response.text}"')
+        super().__init__(f'Telegram BOT API response error:\n  {response.text}"')

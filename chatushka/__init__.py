@@ -1,13 +1,13 @@
 from chatushka._chatushka import ChatushkaBot
-from chatushka._errors import UshkoError, UshkoResponseError
+from chatushka._errors import ChatushkaError, ChatushkaResponseError
 from chatushka._matchers import CommandMatcher, RegexMatcher
 from chatushka._models import Chat, Message, Update, User
 
 __all__ = [
     "ChatushkaBot",
     # errors
-    "UshkoError",
-    "UshkoResponseError",
+    "ChatushkaError",
+    "ChatushkaResponseError",
     # matchers
     "CommandMatcher",
     "RegexMatcher",

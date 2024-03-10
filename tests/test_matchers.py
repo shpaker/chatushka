@@ -1,7 +1,6 @@
 from typing import Type
 
-from pytest import mark
-from pytest import raises
+from pytest import mark, param, raises
 
 from chatushka._matchers import CommandMatcher, RegexMatcher
 from chatushka._matchers import HandlersContainer
@@ -90,21 +89,22 @@ async def test_call_handler_with_param() -> None:
 
 
 @mark.parametrize(
-    "token, prefix, case_sensitive, text",
+    "token, prefixes, case_sensitive, text",
     [
-        ("test", "", False, "foo test bar"),
-        ("test", "", True, "foo tESt bar"),
-        ("test", "!", True, "foo !test bar"),
+        param("test", "", False, "test bar", id="ok"),
+        param("test", "", True, "tESt bar", id="not case_sensitive"),
+        param("test", "!", True, "!test bar", id="with prefix"),
+        param("test", ["!", "?"], True, "?test bar", id="several prefixes"),
     ],
 )
 async def test_command_matcher_success(
     token: str,
-    prefix: str,
+    prefixes: str | list[str],
     case_sensitive: bool,
     text: str,
 ) -> None:
     matcher = CommandMatcher(
-        prefix=prefix,
+        prefixes=prefixes,
         case_sensitive=case_sensitive,
     )
 
@@ -136,7 +136,7 @@ async def test_command_matcher_fail(
     text: str,
 ) -> None:
     matcher = CommandMatcher(
-        prefix=prefix,
+        prefixes=prefix,
         case_sensitive=case_sensitive,
     )
 

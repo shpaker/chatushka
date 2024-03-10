@@ -4,7 +4,7 @@ from httpx import Response, Request, HTTPStatusError
 from pytest import raises, mark
 from respx import MockRouter
 
-from chatushka._errors import UshkoResponseError
+from chatushka._errors import ChatushkaResponseError
 from chatushka._models import Update, Message, User, Chat, ChatType
 from chatushka._transport import (
     TelegramBotAPI,
@@ -28,19 +28,18 @@ async def test_raise_on_api_error_response_event_hook_ok() -> None:
 
 
 @mark.parametrize(
-    "status_code,response_text,error",
+    "status_code,response_text",
     [
-        (500, "", HTTPStatusError),
-        (200, '{"ok": false}', UshkoResponseError),
-        (200, '{"ok": true}', UshkoResponseError),
+        (500, ""),
+        (200, '{"ok": false}'),
+        (200, '{"ok": true}'),
     ],
 )
 async def test_raise_on_api_error_response_event_hook_errors(
     status_code: int,
     response_text: str,
-    error: Type[Exception],
 ) -> None:
-    with raises(error):
+    with raises(ChatushkaResponseError):
         await _raise_on_api_error_response_event_hook(
             Response(
                 status_code=status_code,

@@ -86,13 +86,13 @@ class TelegramBotAPI:
         if self._timeout:
             params["timeout"] = self._timeout
         try:
-            response = self._api_request(
+            response = await self._api_request(
                 api_method="getUpdates",
                 **params,
             )
         except RequestError:
             return [], offset
-        results = [Update.model_validate(entry) for entry in await response]
+        results = [Update.model_validate(entry) for entry in response]
         if results:
             offset = results[-1].update_id + 1
         return results, offset

@@ -1,7 +1,7 @@
 from types import TracebackType
 from typing import Any, Literal
 
-from httpx import AsyncClient, Response
+from httpx import AsyncClient, RequestError, Response
 
 from chatushka._constants import HTTP_REGULAR_TIMEOUT
 from chatushka._errors import ChatushkaResponseError
@@ -85,13 +85,14 @@ class TelegramBotAPI:
         params = {} if not offset else {"offset": offset}
         if self._timeout:
             params["timeout"] = self._timeout
-        results = [
-            Update.model_validate(entry)
-            for entry in await self._api_request(
+        try:
+            response = self._api_request(
                 api_method="getUpdates",
                 **params,
             )
-        ]
+        except RequestError:
+            return [], offset
+        results = [Update.model_validate(entry) for entry in await response]
         if results:
             offset = results[-1].update_id + 1
         return results, offset

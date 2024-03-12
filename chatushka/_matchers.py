@@ -5,7 +5,7 @@ from random import random
 from re import Pattern, compile
 from typing import TypeVar
 
-from chatushka._models import Update
+from chatushka._models import Update, Events
 from chatushka._transport import TelegramBotAPI
 
 Matcher = TypeVar("Matcher", bound="BaseMatcher")
@@ -144,3 +144,32 @@ class RegExMatcher(
         if not update.message or not update.message.text:
             return False
         return any(pattern.findall(update.message.text) for pattern in self._patterns)
+
+
+class EventMatcher(
+    BaseMatcher,
+    ABC,
+):
+    def __init__(
+        self,
+        event: Events,
+        action: Callable,
+        chance_rate: float = 1.0,
+    ) -> None:
+        super().__init__(
+            action=action,
+            chance_rate=chance_rate,
+        )
+        self._event = event
+
+    def _check(
+        self,
+        update: Update,
+    ) -> bool:
+        if update.message and update.message.text and self._event == "on_message":
+            return True
+        if update.message and update.message.new_chat_members and self._event == "on_new_chat_members":
+            return True
+        if update.message and update.message.new_chat_members and self._event == "on_left_chat_member":
+            return True
+        return False

@@ -1,5 +1,5 @@
 import asyncio
-import contextlib
+import datetime
 import os
 import random
 
@@ -52,27 +52,17 @@ async def luk_handler(
 async def id_handler(
     api: chatushka.TelegramBotAPI,
     message: chatushka.Message,
+    user: chatushka.User,
+    chat: chatushka.Chat,
 ) -> None:
-    admins = []
-    with contextlib.suppress(chatushka.ChatushkaResponseError):
-        admins = await api.get_chat_administrators(
-            chat_id=message.chat.id,
-        )
-    line_tmpl = "{id_type}: <pre>{id_value}</pre>"
-    ids = {"user_id": message.user.id}
-    for admin in admins:
-        if admin.user.id == message.user.id:
-            ids = ids | {"chat_id": message.chat.id}
-    text = "\n".join(
-        [
-            line_tmpl.format(id_type=id_type, id_value=id_value)
-            for id_type, id_value in ids.items()
-        ]
-    )
+    text = f"*USER_ID:* `{user.id}`"
+    if user.id != chat.id:
+        text += f"\n*CHAT_ID:* `{chat.id}`"
     await api.send_message(
-        chat_id=message.chat.id,
+        chat_id=chat.id,
         text=text,
         reply_to_message_id=message.message_id,
+        parse_mode="markdown",
     )
 
 
@@ -88,5 +78,55 @@ async def ping_handler(
     )
 
 
+@bot.event("on_message")
+async def welcome_handler(
+    api: chatushka.TelegramBotAPI,
+    chat: chatushka.Chat,
+    message: chatushka.Message,
+) -> None:
+    await api.send_message(
+        chat_id=chat.id,
+        text="message",
+        reply_to_message_id=message.message_id,
+    )
+
+
+@bot.cmd("suicide", "wtf")
+async def suicide_handler(
+    api: chatushka.TelegramBotAPI,
+    message: chatushka.Message,
+) -> None:
+    restrict_time = datetime.timedelta(minutes=random.randrange(1, 4 * 60))
+    try:
+        is_success = await api.restrict_chat_member(
+            chat_id=message.chat.id,
+            user_id=message.user.id,
+            permissions=chatushka.ChatPermissions(
+                can_send_messages=False,
+                can_send_media_messages=False,
+                can_send_polls=False,
+                can_send_other_messages=False,
+            ),
+            until_date=datetime.datetime.now(
+                tz=datetime.timezone.utc,
+            ) + restrict_time,
+        )
+    except ValueError:
+        is_success = False
+    if is_success:
+        await api.send_message(
+            chat_id=message.chat.id,
+            text=f"Пользователь {message.user.readable_name} самовыпилился на {restrict_time}",
+        )
+        return None
+    await api.send_message(
+        chat_id=message.chat.id,
+        text=f"Лапки коротковаты чтоб убить {message.user.readable_name}",
+        reply_to_message_id=message.message_id,
+    )
+
+
 if __name__ == "__main__":
-    asyncio.run(bot.run())
+    asyncio.run(
+        bot.run(),
+    )

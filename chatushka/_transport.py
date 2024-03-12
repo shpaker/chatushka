@@ -1,3 +1,4 @@
+from datetime import datetime
 from types import TracebackType
 from typing import Any, Literal
 
@@ -11,6 +12,7 @@ from chatushka._models import (
     ChatMemberStatuses,
     Message,
     Update,
+    ChatPermissions,
 )
 
 
@@ -131,3 +133,19 @@ class TelegramBotAPI:
             if status == ChatMemberStatuses.ADMINISTRATOR:
                 admins.append(ChatMemberAdministrator.model_validate(result))
         return admins
+
+    async def restrict_chat_member(
+        self,
+        chat_id: int,
+        user_id: int,
+        permissions: ChatPermissions,
+        until_date: datetime,
+    ) -> bool:
+        result = await self._api_request(
+            "restrictChatMember",
+            chat_id=chat_id,
+            user_id=user_id,
+            permissions=permissions.json(),
+            until_date=int(until_date.timestamp()),
+        )
+        return result

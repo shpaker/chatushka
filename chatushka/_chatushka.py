@@ -1,12 +1,21 @@
 from asyncio import gather
 from collections.abc import Callable, Sequence
-from typing import final
+from contextlib import asynccontextmanager
+from typing import final, MutableMapping
 
 from chatushka._constants import (
     HTTP_POOLING_TIMEOUT,
 )
-from chatushka._matchers import CommandMatcher, Matcher, RegExMatcher
+from chatushka._matchers import CommandMatcher, Matcher, RegExMatcher, EventMatcher
+from chatushka._models import Events
 from chatushka._transport import TelegramBotAPI
+
+
+@asynccontextmanager
+async def _default_lifespan(
+    _: "ChatushkaBot",
+) -> None:
+    yield
 
 
 @final
@@ -16,7 +25,10 @@ class ChatushkaBot:
         *,
         token: str,
         cmd_prefixes: str | Sequence[str] = (),
+        lifespan=None,
     ) -> None:
+        self._state: MutableMapping = {}
+        self._lifespan = lifespan or _default_lifespan
         self._token = token
         if isinstance(cmd_prefixes, str):
             cmd_prefixes = [cmd_prefixes]
@@ -97,6 +109,36 @@ class ChatushkaBot:
 
         return _wrapper
 
+    def add_event(
+        self,
+        event: Events,
+        action: Callable,
+        chance_rate: float = 1.0,
+    ) -> None:
+        self.add_matcher(
+            EventMatcher(
+                event=event,
+                action=action,
+                chance_rate=chance_rate,
+            )
+        )
+
+    def event(
+        self,
+        event: Events,
+        chance_rate: float = 1.0,
+    ) -> Callable:
+        def _wrapper(
+            func,
+        ) -> None:
+            self.add_event(
+                event=event,
+                action=func,
+                chance_rate=chance_rate,
+            )
+
+        return _wrapper
+
     async def _check_updates(
         self,
         api: TelegramBotAPI,
@@ -117,7 +159,7 @@ class ChatushkaBot:
         )
         return offset
 
-    async def run(
+    async def _loop(
         self,
     ) -> None:
         offset: int | None = None
@@ -130,3 +172,11 @@ class ChatushkaBot:
                     api=api,
                     offset=offset,
                 )
+
+    async def run(
+        self,
+    ) -> None:
+        async with self._lifespan(
+            self,
+        ):
+            await self._loop()

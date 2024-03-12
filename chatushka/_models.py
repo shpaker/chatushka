@@ -1,6 +1,6 @@
 from datetime import datetime
-from enum import Enum
-from typing import Optional
+from enum import Enum, auto
+from typing import Optional, Literal
 
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 
@@ -133,3 +133,10 @@ class ChatPermissions(
     can_send_media_messages: bool
     can_send_polls: bool
     can_send_other_messages: bool
+
+
+Events = Literal[
+    "on_message",
+    "on_new_chat_members",
+    "on_left_chat_member",
+]

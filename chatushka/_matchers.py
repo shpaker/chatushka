@@ -1,46 +1,61 @@
 from abc import ABC, abstractmethod
-from asyncio import gather
-from collections.abc import Callable, Coroutine
+from collections.abc import Callable, Sequence
 from inspect import iscoroutinefunction, signature
-from re import findall
-from typing import Any
+from random import random
+from re import Pattern, compile
+from typing import TypeVar
 
 from chatushka._models import Update
 from chatushka._transport import TelegramBotAPI
 
+Matcher = TypeVar("Matcher", bound="BaseMatcher")
 
-class HandlersContainer(
+
+class BaseMatcher(
     ABC,
 ):
     def __init__(
         self,
+        action: Callable,
+        chance_rate: float = 1.0,
     ) -> None:
-        self._handlers: dict[tuple[str, ...], Any] = {}
+        self._action: Callable = action
+        self._chance_rate = chance_rate
 
     @abstractmethod
-    def check_condition(
+    def _check(
         self,
-        token: str,
         update: Update,
     ) -> bool:
         raise NotImplementedError
 
-    def add_handler(
+    async def __call__(
         self,
-        tokens: str | tuple[str, ...],
-        handler,
-    ) -> None:
-        if isinstance(tokens, str):
-            tokens = (tokens,)
-        self._handlers[tokens] = handler
-
-    @staticmethod
-    async def _call_handler(
-        handler: Callable,
         api: TelegramBotAPI,
         update: Update,
-        **kwargs: Any,
     ) -> None:
+        if not self._check(
+            update=update,
+        ):
+            return
+        await self._call_action(
+            api=api,
+            update=update,
+        )
+
+    def _get_chance(
+        self,
+    ) -> bool:
+        return random() <= self._chance_rate
+
+    async def _call_action(
+        self,
+        api: TelegramBotAPI,
+        update: Update,
+    ) -> None:
+        if not self._get_chance():
+            return
+        kwargs = {}
         kwargs.update(
             {
                 "api": api,
@@ -50,150 +65,82 @@ class HandlersContainer(
                 "user": update.message.user if update.message else None,
             }
         )
-        sig = signature(handler)
-        sig_kwargs = {param: kwargs.get(param) for param in sig.parameters if param in kwargs}
+        sig = signature(self._action)
+        kwargs = {param: kwargs.get(param) for param in sig.parameters if param in kwargs}
         if update and update.message is not None and "message" in sig.parameters:
-            sig_kwargs["message"] = update.message
-        (await handler(**sig_kwargs) if iscoroutinefunction(handler) else handler(**sig_kwargs))
-
-    async def check_handlers(
-        self,
-        api: TelegramBotAPI,
-        update: Update,
-    ) -> list[Coroutine[Any, Any, None]]:
-        handlers_tasks = []
-        for tokens, handler in self._handlers.items():
-            for token in tokens:
-                if self.check_condition(token, update):
-                    handlers_tasks.append(
-                        self._call_handler(
-                            handler,
-                            api=api,
-                            token=token,
-                            update=update,
-                        )
-                    )
-                    break
-        return handlers_tasks
+            kwargs["message"] = update.message
+        if iscoroutinefunction(self._action):
+            await self._action(**kwargs)
+            return
+        self._action(**kwargs)
 
 
-class MatchersContainer:
-    def __init__(
-        self,
-    ) -> None:
-        self._nested_matchers: list["HandlersContainer"] = []
-
-    def add_matcher(
-        self,
-        *matchers: "HandlersContainer",
-    ) -> None:
-        self._nested_matchers += matchers
-
-    async def _check_nested_matchers(
-        self,
-        api: TelegramBotAPI,
-        update: Update,
-    ) -> list[Coroutine[Any, Any, None]]:
-        handlers_tasks = []
-        for matcher in self._nested_matchers:
-            handlers_tasks += await matcher.check_handlers(
-                api=api,
-                update=update,
-            )
-        return handlers_tasks
-
-
-class MatcherBase(
-    HandlersContainer,
-    MatchersContainer,
+class CommandMatcher(
+    BaseMatcher,
     ABC,
 ):
     def __init__(
         self,
+        *commands: str,
+        action: Callable,
+        prefixes: str | Sequence[str] = (),
+        case_sensitive: bool = False,
+        chance_rate: float = 1.0,
     ) -> None:
-        super().__init__()
-
-    def __call__(
-        self,
-        *tokens: str,
-    ) -> Callable[[Callable[[], None]], None]:
-        return self.decorator(tokens)
-
-    def decorator(
-        self,
-        tokens: tuple[str, ...],
-    ) -> Callable:
-        def _wrapper(
-            func,
-        ) -> None:
-            self.add_handler(
-                tokens=tokens,
-                handler=func,
-            )
-
-        return _wrapper
-
-    async def check(
-        self,
-        api: TelegramBotAPI,
-        update: Update,
-    ) -> list[Coroutine[Any, Any, None]]:
-        handlers_tasks, matchers_tasks = await gather(
-            self.check_handlers(
-                api=api,
-                update=update,
-            ),
-            self._check_nested_matchers(
-                api=api,
-                update=update,
-            ),
+        super().__init__(
+            action=action,
+            chance_rate=chance_rate,
         )
-        return handlers_tasks + matchers_tasks
+        if case_sensitive:
+            commands = tuple(command.upper() for command in commands)
+        self._commands = commands
+        self._case_sensitive = case_sensitive
+        if prefixes:
+            self.add_commands_prefixes(prefixes)
+
+    def add_commands_prefixes(
+        self,
+        prefixes: Sequence[str],
+    ) -> None:
+        if not prefixes:
+            return
+        self._commands = tuple(f"{prefix}{command}" for command in self._commands for prefix in prefixes)
+
+    def _check(
+        self,
+        update: Update,
+    ) -> bool:
+        if not update.message or not update.message.text:
+            return False
+        case_sensitive = self._case_sensitive or False
+        for command in self._commands:
+            if case_sensitive and update.message.text.upper().startswith(command.upper()):
+                return True
+            if update.message.text.startswith(command):
+                return True
+        return False
 
 
-class CommandMatcher(
-    MatcherBase,
+class RegExMatcher(
+    BaseMatcher,
+    ABC,
 ):
     def __init__(
         self,
-        prefixes: str | list[str] = "",
-        *,
-        case_sensitive: bool = False,
+        *patterns: str | Pattern,
+        action: Callable,
+        chance_rate: float = 1.0,
     ) -> None:
-        super().__init__()
-        if isinstance(prefixes, str):
-            prefixes = [prefixes]
-        if case_sensitive:
-            prefixes = [prefix.upper() for prefix in prefixes]
-        self._prefixes = prefixes
-        self._case_sensitive = case_sensitive
+        super().__init__(
+            action=action,
+            chance_rate=chance_rate,
+        )
+        self._patterns = [compile(pattern) if isinstance(pattern, str) else pattern for pattern in patterns]
 
-    def check_condition(
+    def _check(
         self,
-        token: str,
         update: Update,
     ) -> bool:
         if not update.message or not update.message.text:
             return False
-        for prefix in self._prefixes:
-            with_prefix = prefix + token
-            if self._case_sensitive and update.message.text.upper().startswith(with_prefix.upper()):
-                return True
-            if update.message.text.startswith(with_prefix):
-                return True
-        return False
-
-
-class RegexMatcher(
-    MatcherBase,
-):
-    def check_condition(
-        self,
-        token: str,  # type: ignore
-        update: Update,
-    ) -> bool:
-        if not update.message or not update.message.text:
-            return False
-        if findall(token, update.message.text):
-            return True
-        return False
+        return any(pattern.findall(update.message.text) for pattern in self._patterns)

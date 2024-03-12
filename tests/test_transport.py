@@ -1,6 +1,6 @@
-from typing import Type
+from typing import Callable
 
-from httpx import Response, Request, HTTPStatusError
+from httpx import Response, Request
 from pytest import raises, mark
 from respx import MockRouter
 
@@ -72,6 +72,7 @@ async def test_telegram_bot_api_client_request(
 
 async def test_telegram_bot_api_transport_get_updates(
     respx_mock: MockRouter,
+    testing_update_data: Update,
 ) -> None:
     respx_mock.post().respond(
         json={
@@ -119,7 +120,7 @@ async def test_telegram_bot_api_transport_get_updates(
                         },
                         "forward_from_message_id": 35146,
                         "forward_date": 1709893593,
-                        "text": "Фентези моего детства https://t.me/Veyderr_history/1747",
+                        "text": "-foo-",
                         "entities": [{"offset": 22, "length": 33, "type": "url"}],
                         "link_preview_options": {"url": "https://t.me/Veyderr_history/1747"},
                     },
@@ -130,32 +131,11 @@ async def test_telegram_bot_api_transport_get_updates(
     async with TelegramBotAPI(
         token=_TESTING_TOKEN,
     ) as transport:
-        results = await transport.get_updates()
-    assert results == [
-        Update(
-            update_id=780080167,
-            message=Message(
-                message_id=164380,
-                user=User(
-                    id=777000,
-                    is_bot=False,
-                    first_name="Telegram",
-                    last_name=None,
-                    can_join_groups=None,
-                    can_read_all_group_messages=None,
-                ),
-                chat=Chat(
-                    id=-1001357425012,
-                    type=ChatType.SUPERGROUP,
-                    title="биг блк дик",
-                ),
-                text="Фентези моего детства https://t.me/Veyderr_history/1747",
-                reply_to_message=None,
-                new_chat_members=[],
-            ),
-            my_chat_member=None,
-        ),
-    ], results
+        results = await transport.get_updates(None)
+    assert results == (
+        [testing_update_data],
+        780080168,
+    ), results
 
 
 async def test_telegram_bot_api_transport_send_message(

@@ -1,54 +1,132 @@
 from asyncio import gather
+from collections.abc import Callable, Sequence
+from typing import final
 
 from chatushka._constants import (
     HTTP_POOLING_TIMEOUT,
 )
-from chatushka._handlers import id_handler, ping_handler
-from chatushka._matchers import CommandMatcher, MatchersContainer
+from chatushka._matchers import CommandMatcher, Matcher, RegExMatcher
 from chatushka._transport import TelegramBotAPI
 
 
-class ChatushkaBot(
-    MatchersContainer,
-):
+@final
+class ChatushkaBot:
     def __init__(
         self,
+        *,
         token: str,
+        cmd_prefixes: str | Sequence[str] = (),
     ) -> None:
-        super().__init__()
         self._token = token
-        self.setup_default_handlers()
+        if isinstance(cmd_prefixes, str):
+            cmd_prefixes = [cmd_prefixes]
+        self._cmd_prefixes = cmd_prefixes
+        self._matchers: list[Matcher] = []  # type: ignore
 
-    def setup_default_handlers(
+    def add_matcher(
         self,
+        matcher: Matcher,
     ) -> None:
-        matcher = CommandMatcher(
-            prefixes=["!", "/"],
+        if isinstance(matcher, CommandMatcher):
+            matcher.add_commands_prefixes(
+                self._cmd_prefixes,
+            )
+        self._matchers.append(matcher)
+
+    def add_cmd(
+        self,
+        *commands: str,
+        action: Callable,
+        case_sensitive: bool = False,
+        chance_rate: float = 1.0,
+    ):
+        self.add_matcher(
+            CommandMatcher(
+                *commands,
+                action=action,
+                case_sensitive=case_sensitive,
+                chance_rate=chance_rate,
+            )
         )
-        matcher.add_handler("id", id_handler)
-        matcher.add_handler("ping", ping_handler)
-        self.add_matcher(matcher)
+
+    def cmd(
+        self,
+        *commands: str,
+        case_sensitive: bool = False,
+        chance_rate: float = 1.0,
+    ) -> Callable:
+        def _wrapper(
+            func,
+        ) -> None:
+            self.add_cmd(
+                *commands,
+                action=func,
+                case_sensitive=case_sensitive,
+                chance_rate=chance_rate,
+            )
+
+        return _wrapper
+
+    def add_regex(
+        self,
+        *patterns: str,
+        action: Callable,
+        chance_rate: float = 1.0,
+    ):
+        self.add_matcher(
+            RegExMatcher(
+                *patterns,
+                action=action,
+                chance_rate=chance_rate,
+            )
+        )
+
+    def regex(
+        self,
+        *patterns: str,
+        chance_rate: float = 1.0,
+    ) -> Callable:
+        def _wrapper(
+            func,
+        ) -> None:
+            self.add_regex(
+                *patterns,
+                action=func,
+                chance_rate=chance_rate,
+            )
+
+        return _wrapper
 
     async def _check_updates(
         self,
-    ) -> None:
-        async with TelegramBotAPI(
-            token=self._token,
-            timeout=HTTP_POOLING_TIMEOUT,
-        ) as api:
-            if not (updates := await api.get_updates()):
-                return
-            matched = []
-            for update in updates:
-                matched += await self._check_nested_matchers(
+        api: TelegramBotAPI,
+        offset: int | None,
+    ) -> int | None:
+        updates, offset = await api.get_updates(offset)
+        if not updates:
+            return offset
+        await gather(
+            *[
+                matcher(  # type: ignore
                     api=api,
                     update=update,
                 )
-            if matched:
-                await gather(*matched)
+                for update in updates
+                for matcher in self._matchers
+            ]
+        )
+        return offset
 
-    async def start(
+    async def run(
         self,
     ) -> None:
+        offset: int | None = None
         while True:
-            await self._check_updates()
+            async with TelegramBotAPI(
+                token=self._token,
+                timeout=HTTP_POOLING_TIMEOUT,
+            ) as api:
+                offset = await self._check_updates(
+                    api=api,
+                    offset=offset,
+                )

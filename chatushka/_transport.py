@@ -80,8 +80,8 @@ class TelegramBotAPI:
 
     async def get_updates(
         self,
-    ) -> list[Update]:
-        offset: int | None = self._offsets.get(self._token)
+        offset: int | None,
+    ) -> tuple[list[Update], int | None]:
         params = {} if not offset else {"offset": offset}
         if self._timeout:
             params["timeout"] = self._timeout
@@ -92,8 +92,9 @@ class TelegramBotAPI:
                 **params,
             )
         ]
-        self.__class__._offsets[self._token] = results[-1].update_id + 1  # noqa
-        return results
+        if results:
+            offset = results[-1].update_id + 1
+        return results, offset
 
     async def send_message(
         self,

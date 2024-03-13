@@ -1,6 +1,6 @@
 from datetime import datetime
-from enum import Enum, auto
-from typing import Optional, Literal
+from enum import Enum
+from typing import Literal, Optional
 
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 

@@ -6,7 +6,7 @@ import random
 import chatushka
 from example.constants import MAGIC_EIGHT_BALL_CHOICES
 
-bot = chatushka.ChatushkaBot(
+bot = chatushka.Chatushka(
     token=os.environ["CHATUSHKA_TOKEN"],
     cmd_prefixes=("!", "/"),
 )

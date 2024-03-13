@@ -1,34 +1,41 @@
 from asyncio import gather
-from collections.abc import Callable, Sequence
-from contextlib import asynccontextmanager
-from typing import final, MutableMapping
+from collections.abc import AsyncGenerator, Callable, MutableMapping, Sequence
+from contextlib import (
+    AbstractAsyncContextManager,
+    _AsyncGeneratorContextManager,
+    asynccontextmanager,
+)
+from typing import Any, final
 
 from chatushka._constants import (
     HTTP_POOLING_TIMEOUT,
 )
-from chatushka._matchers import CommandMatcher, Matcher, RegExMatcher, EventMatcher
+from chatushka._matchers import CommandMatcher, EventMatcher, Matcher, RegExMatcher
 from chatushka._models import Events
 from chatushka._transport import TelegramBotAPI
 
 
 @asynccontextmanager
 async def _default_lifespan(
-    _: "ChatushkaBot",
-) -> None:
+    _: "Chatushka",
+) -> AsyncGenerator[None, None]:
     yield
 
 
 @final
-class ChatushkaBot:
+class Chatushka:
     def __init__(
         self,
         *,
         token: str,
         cmd_prefixes: str | Sequence[str] = (),
-        lifespan=None,
+        lifespan: AbstractAsyncContextManager | None = None,
     ) -> None:
         self._state: MutableMapping = {}
-        self._lifespan = lifespan or _default_lifespan
+        self._lifespan: (
+            AbstractAsyncContextManager[Any]
+            | Callable[[Chatushka], _AsyncGeneratorContextManager[None]]
+        ) = (lifespan or _default_lifespan)
         self._token = token
         if isinstance(cmd_prefixes, str):
             cmd_prefixes = [cmd_prefixes]

@@ -1,11 +1,11 @@
-from chatushka._chatushka import ChatushkaBot
+from chatushka._chatushka import Chatushka
 from chatushka._errors import ChatushkaError, ChatushkaResponseError
-from chatushka._matchers import BaseMatcher, CommandMatcher, RegExMatcher, EventMatcher
-from chatushka._models import Chat, Message, Update, User, Events, ChatPermissions
+from chatushka._matchers import BaseMatcher, CommandMatcher, EventMatcher, RegExMatcher
+from chatushka._models import Chat, ChatPermissions, Events, Message, Update, User
 from chatushka._transport import TelegramBotAPI
 
 __all__ = [
-    "ChatushkaBot",
+    "Chatushka",
     # errors
     "ChatushkaError",
     "ChatushkaResponseError",

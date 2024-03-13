@@ -10,9 +10,9 @@ from chatushka._models import (
     ChatMemberAdministrator,
     ChatMemberOwner,
     ChatMemberStatuses,
+    ChatPermissions,
     Message,
     Update,
-    ChatPermissions,
 )
 
 
@@ -58,7 +58,7 @@ class TelegramBotAPI:
     ) -> list[dict[str, Any]] | dict[str, Any]:
         response = await self._client.post(
             url=api_method,
-            data=kwargs,
+            json=kwargs,
         )
         return response.json()["result"]
 
@@ -141,11 +141,10 @@ class TelegramBotAPI:
         permissions: ChatPermissions,
         until_date: datetime,
     ) -> bool:
-        result = await self._api_request(
+        return await self._api_request(
             "restrictChatMember",
             chat_id=chat_id,
             user_id=user_id,
             permissions=permissions.json(),
             until_date=int(until_date.timestamp()),
         )
-        return result

@@ -3,7 +3,7 @@
 SOURCE_DIR := "chatushka"
 TESTS_DIR := "tests"
 
-lint: mypy ruff
+lint: ruff mypy
 
 mypy:
     poetry run python -m mypy --pretty --package {{ SOURCE_DIR }}

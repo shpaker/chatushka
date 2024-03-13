@@ -5,7 +5,7 @@ from random import random
 from re import Pattern, compile
 from typing import TypeVar
 
-from chatushka._models import Update, Events
+from chatushka._models import Events, Update
 from chatushka._transport import TelegramBotAPI
 
 Matcher = TypeVar("Matcher", bound="BaseMatcher")

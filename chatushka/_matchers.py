@@ -3,7 +3,9 @@ from collections.abc import Callable, Sequence
 from inspect import iscoroutinefunction, signature
 from random import random
 from re import Pattern, compile
-from typing import TypeVar
+from typing import TypeVar, Any
+
+from pydantic import BaseModel
 
 from chatushka._models import Events, Update
 from chatushka._transport import TelegramBotAPI
@@ -18,15 +20,17 @@ class BaseMatcher(
         self,
         action: Callable,
         chance_rate: float = 1.0,
+        results_model: type[Any] | None = None,
     ) -> None:
         self._action: Callable = action
         self._chance_rate = chance_rate
+        self._results_model = results_model
 
     @abstractmethod
     def _check(
         self,
         update: Update,
-    ) -> bool:
+    ) -> list[str] | None:
         raise NotImplementedError
 
     async def __call__(
@@ -34,13 +38,16 @@ class BaseMatcher(
         api: TelegramBotAPI,
         update: Update,
     ) -> None:
-        if not self._check(
-            update=update,
-        ):
+        if (
+            results := self._check(
+                update=update,
+            )
+        ) is None:
             return
         await self._call_action(
             api=api,
             update=update,
+            results=results,
         )
 
     def _get_chance(
@@ -48,14 +55,31 @@ class BaseMatcher(
     ) -> bool:
         return random() <= self._chance_rate
 
+    def _make_results_model(
+        self,
+        results: list[str],
+    ) -> Any:
+        if self._results_model is None:
+            return None
+        if issubclass(self._results_model, BaseModel):
+            params = {}
+            for i, name in enumerate(self._results_model.model_fields):
+                if len(results) < i:
+                    break
+                params[name] = results[i]
+            return self._results_model.model_validate(params)
+        return self._results_model(results)
+
     async def _call_action(
         self,
         api: TelegramBotAPI,
         update: Update,
+        results: Any,
     ) -> None:
         if not self._get_chance():
             return
         kwargs = {}
+        results_from_model = self._make_results_model(results)
         kwargs.update(
             {
                 "api": api,
@@ -63,10 +87,13 @@ class BaseMatcher(
                 "message": update.message,
                 "chat": update.message.chat if update.message else None,
                 "user": update.message.user if update.message else None,
+                "results": results_from_model or results,
             }
         )
         sig = signature(self._action)
-        kwargs = {param: kwargs.get(param) for param in sig.parameters if param in kwargs}
+        kwargs = {
+            param: kwargs.get(param) for param in sig.parameters if param in kwargs
+        }
         if update and update.message is not None and "message" in sig.parameters:
             kwargs["message"] = update.message
         if iscoroutinefunction(self._action):
@@ -86,10 +113,12 @@ class CommandMatcher(
         prefixes: str | Sequence[str] = (),
         case_sensitive: bool = False,
         chance_rate: float = 1.0,
+        results_model: type[Any] | None = None,
     ) -> None:
         super().__init__(
             action=action,
             chance_rate=chance_rate,
+            results_model=results_model,
         )
         if case_sensitive:
             commands = tuple(command.upper() for command in commands)
@@ -104,21 +133,34 @@ class CommandMatcher(
     ) -> None:
         if not prefixes:
             return
-        self._commands = tuple(f"{prefix}{command}" for command in self._commands for prefix in prefixes)
+        self._commands = tuple(
+            f"{prefix}{command}" for command in self._commands for prefix in prefixes
+        )
+
+    def _make_args(
+        self,
+        text: str,
+    ) -> list[str]:
+        args = [arg for arg in text.split(" ") if arg]
+        if len(args) == 1:
+            return []
+        return args[1:]
 
     def _check(
         self,
         update: Update,
-    ) -> bool:
+    ) -> list[str] | None:
         if not update.message or not update.message.text:
-            return False
+            return None
         case_sensitive = self._case_sensitive or False
         for command in self._commands:
-            if case_sensitive and update.message.text.upper().startswith(command.upper()):
-                return True
+            if case_sensitive and update.message.text.upper().startswith(
+                command.upper()
+            ):
+                return self._make_args(update.message.text)
             if update.message.text.startswith(command):
-                return True
-        return False
+                return self._make_args(update.message.text)
+        return None
 
 
 class RegExMatcher(
@@ -130,20 +172,28 @@ class RegExMatcher(
         *patterns: str | Pattern,
         action: Callable,
         chance_rate: float = 1.0,
+        results_model: type[Any] | None = None,
     ) -> None:
         super().__init__(
             action=action,
             chance_rate=chance_rate,
+            results_model=results_model,
         )
-        self._patterns = [compile(pattern) if isinstance(pattern, str) else pattern for pattern in patterns]
+        self._patterns = [
+            compile(pattern) if isinstance(pattern, str) else pattern
+            for pattern in patterns
+        ]
 
     def _check(
         self,
         update: Update,
-    ) -> bool:
+    ) -> list[str] | None:
         if not update.message or not update.message.text:
-            return False
-        return any(pattern.findall(update.message.text) for pattern in self._patterns)
+            return None
+        for pattern in self._patterns:
+            if result := pattern.findall(update.message.text):
+                return result
+        return None
 
 
 class EventMatcher(
@@ -152,24 +202,37 @@ class EventMatcher(
 ):
     def __init__(
         self,
-        event: Events,
+        *events: Events,
         action: Callable,
         chance_rate: float = 1.0,
+        results_model: type[Any] | None = None,
     ) -> None:
         super().__init__(
             action=action,
             chance_rate=chance_rate,
+            results_model=results_model,
         )
-        self._event = event
+        self._events = events
 
     def _check(
         self,
         update: Update,
-    ) -> bool:
-        if update.message and update.message.text and self._event == "on_message":
-            return True
-        if update.message and update.message.new_chat_members and self._event == "on_new_chat_members":
-            return True
-        if update.message and update.message.new_chat_members and self._event == "on_left_chat_member":
-            return True
-        return False
+    ) -> list[str] | None:
+        results = []
+        if update.message and update.message.text and "on_message" in self._events:
+            results.append("on_message")
+        if (
+            update.message
+            and update.message.new_chat_members
+            and "on_new_chat_members" in self._events
+        ):
+            results.append("on_new_chat_members")
+        if (
+            update.message
+            and update.message.new_chat_members
+            and "on_left_chat_member" in self._events
+        ):
+            results.append("on_left_chat_member")
+        if not results:
+            return None
+        return results

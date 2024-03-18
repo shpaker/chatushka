@@ -2,8 +2,8 @@ from asyncio import gather
 from collections.abc import AsyncGenerator, Callable, MutableMapping, Sequence
 from contextlib import (
     AbstractAsyncContextManager,
-    _AsyncGeneratorContextManager,
     asynccontextmanager,
+    _AsyncGeneratorContextManager,
 )
 from typing import Any, final
 
@@ -58,13 +58,15 @@ class Chatushka:
         action: Callable,
         case_sensitive: bool = False,
         chance_rate: float = 1.0,
-    ):
+        results_model: type[Any] | None = None,
+    ) -> None:
         self.add_matcher(
             CommandMatcher(
                 *commands,
                 action=action,
                 case_sensitive=case_sensitive,
                 chance_rate=chance_rate,
+                results_model=results_model,
             )
         )
 
@@ -73,6 +75,7 @@ class Chatushka:
         *commands: str,
         case_sensitive: bool = False,
         chance_rate: float = 1.0,
+        results_model: type[Any] | None = None,
     ) -> Callable:
         def _wrapper(
             func,
@@ -82,6 +85,7 @@ class Chatushka:
                 action=func,
                 case_sensitive=case_sensitive,
                 chance_rate=chance_rate,
+                results_model=results_model,
             )
 
         return _wrapper
@@ -91,12 +95,14 @@ class Chatushka:
         *patterns: str,
         action: Callable,
         chance_rate: float = 1.0,
-    ):
+        results_model: type[Any] | None = None,
+    ) -> None:
         self.add_matcher(
             RegExMatcher(
                 *patterns,
                 action=action,
                 chance_rate=chance_rate,
+                results_model=results_model,
             )
         )
 
@@ -104,6 +110,7 @@ class Chatushka:
         self,
         *patterns: str,
         chance_rate: float = 1.0,
+        results_model: type[Any] | None = None,
     ) -> Callable:
         def _wrapper(
             func,
@@ -112,36 +119,41 @@ class Chatushka:
                 *patterns,
                 action=func,
                 chance_rate=chance_rate,
+                results_model=results_model
             )
 
         return _wrapper
 
     def add_event(
         self,
-        event: Events,
+        *events: Events,
         action: Callable,
         chance_rate: float = 1.0,
+        results_model: type[Any] | None = None,
     ) -> None:
         self.add_matcher(
             EventMatcher(
-                event=event,
+                *events,
                 action=action,
                 chance_rate=chance_rate,
+                results_model=results_model,
             )
         )
 
     def event(
         self,
-        event: Events,
+        *events: Events,
         chance_rate: float = 1.0,
+        results_model: type[Any] | None = None,
     ) -> Callable:
         def _wrapper(
             func,
         ) -> None:
             self.add_event(
-                event=event,
+                *events,
                 action=func,
                 chance_rate=chance_rate,
+                results_model=results_model,
             )
 
         return _wrapper

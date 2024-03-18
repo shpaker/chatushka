@@ -21,6 +21,7 @@ async def test_matcher_call_async_action() -> None:
             update=Update(
                 update_id="911",
             ),
+            results=(),
         )
 
 
@@ -38,6 +39,7 @@ async def test_matcher_call_sync_action() -> None:
             update=Update(
                 update_id="911",
             ),
+            results=(),
         )
 
 
@@ -67,11 +69,12 @@ async def test_command_matcher_success(
         prefixes=prefixes,
     )
     update = make_update_data(text)
-    assert matcher._check(update=update) is True
+    assert matcher._check(update=update) == ['bar',]
     with raises(RuntimeError):
         await matcher._call_action(
             api=TelegramBotAPI(token="123:abc"),
             update=update,
+            results=(),
         )
 
 
@@ -100,7 +103,7 @@ async def test_command_matcher_fail(
         prefixes=prefixes,
     )
     update = make_update_data(text)
-    assert matcher._check(update=update) is False
+    assert matcher._check(update=update) is None
 
 
 async def test_regex_matcher_success(
@@ -114,11 +117,12 @@ async def test_regex_matcher_success(
         action=_func,
     )
     update = make_update_data("abyss")
-    assert matcher._check(update=update) is True
+    assert matcher._check(update=update) == ['abyss']
     with raises(RuntimeError):
         await matcher._call_action(
             api=TelegramBotAPI(token="123:abc"),
             update=update,
+            results=(),
         )
 
 
@@ -133,4 +137,4 @@ async def test_regex_matcher_fail(
         action=_func,
     )
     update = make_update_data("abyss22")
-    assert matcher._check(update=update) is False
+    assert matcher._check(update=update) is None

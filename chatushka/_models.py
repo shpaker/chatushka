@@ -58,17 +58,17 @@ class ChatMemberOwner(
 class ChatMemberAdministrator(
     ChatMemberBase,
 ):
-    can_be_edited: bool | None
-    can_manage_chat: bool | None
-    can_delete_messages: bool | None
-    can_manage_voice_chats: bool | None
-    can_restrict_members: bool | None
-    can_promote_members: bool | None
-    can_change_info: bool | None
-    can_invite_users: bool | None
-    can_post_messages: bool | None
-    can_edit_messages: bool | None
-    can_pin_messages: bool | None
+    can_be_edited: bool | None = None
+    can_manage_chat: bool | None = None
+    can_delete_messages: bool | None = None
+    can_manage_voice_chats: bool | None = None
+    can_restrict_members: bool | None = None
+    can_promote_members: bool | None = None
+    can_change_info: bool | None = None
+    can_invite_users: bool | None = None
+    can_post_messages: bool | None = None
+    can_edit_messages: bool | None =None
+    can_pin_messages: bool | None = None
 
 
 class Chat(

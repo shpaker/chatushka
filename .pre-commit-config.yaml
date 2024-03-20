@@ -9,7 +9,7 @@ repos:
       - id: tests
         stages: [ pre-push ]
         name: tests
-        entry: just pytest
+        entry: just tests
         language: system
         pass_filenames: false
   - repo: local

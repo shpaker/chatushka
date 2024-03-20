@@ -12,6 +12,7 @@ repository = "https://github.com/shpaker/chatushka"
 python = ">=3.9,<4.0"
 httpx = "*"
 pydantic = ">=2.0"
+sentry-sdk = {version = "^1.43.0", optional = true}
 
 [tool.poetry.group.example]
 optional = true

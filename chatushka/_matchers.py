@@ -7,6 +7,7 @@ from typing import TypeVar, Any
 
 from pydantic import BaseModel
 
+from chatushka._logger import logger
 from chatushka._models import Events, Update
 from chatushka._transport import TelegramBotAPI
 
@@ -44,6 +45,7 @@ class BaseMatcher(
             )
         ) is None:
             return
+        logger.info(f"{self} matched with update_id={update.update_id} {results=}")
         await self._call_action(
             api=api,
             update=update,
@@ -127,6 +129,11 @@ class CommandMatcher(
         if prefixes:
             self.add_commands_prefixes(prefixes)
 
+    def __repr__(
+        self,
+    ) -> str:
+        return f"<{self.__class__.__name__}: {', '.join(self._commands)}>"
+
     def add_commands_prefixes(
         self,
         prefixes: Sequence[str],
@@ -184,6 +191,11 @@ class RegExMatcher(
             for pattern in patterns
         ]
 
+    def __repr__(
+        self,
+    ) -> str:
+        return f"<{self.__class__.__name__}: {', '.join([entry.pattern for entry in self._patterns])}>"
+
     def _check(
         self,
         update: Update,
@@ -213,6 +225,11 @@ class EventMatcher(
             results_model=results_model,
         )
         self._events = events
+
+    def __repr__(
+        self,
+    ) -> str:
+        return f"<{self.__class__.__name__}: {', '.join(self._events)}>"
 
     def _check(
         self,

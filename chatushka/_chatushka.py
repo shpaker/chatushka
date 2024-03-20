@@ -3,15 +3,19 @@ from collections.abc import AsyncGenerator, Callable, MutableMapping, Sequence
 from contextlib import (
     AbstractAsyncContextManager,
     asynccontextmanager,
-    _AsyncGeneratorContextManager,
 )
+from traceback import print_exc
 from typing import Any, final
 
+from chatushka._errors import ChatushkaResponseError
+from chatushka.__version__ import __version__
 from chatushka._constants import (
     HTTP_POOLING_TIMEOUT,
 )
+from chatushka._logger import logger
 from chatushka._matchers import CommandMatcher, EventMatcher, Matcher, RegExMatcher
 from chatushka._models import Events
+from chatushka._sentry import report_exc
 from chatushka._transport import TelegramBotAPI
 
 
@@ -30,17 +34,23 @@ class Chatushka:
         token: str,
         cmd_prefixes: str | Sequence[str] = (),
         lifespan: AbstractAsyncContextManager | None = None,
+        mute_errors: bool = False,
     ) -> None:
         self._state: MutableMapping = {}
-        self._lifespan: (
-            AbstractAsyncContextManager[Any]
-            | Callable[[Chatushka], _AsyncGeneratorContextManager[None]]
-        ) = (lifespan or _default_lifespan)
+        self._lifespan = lifespan or _default_lifespan
         self._token = token
         if isinstance(cmd_prefixes, str):
             cmd_prefixes = [cmd_prefixes]
         self._cmd_prefixes = cmd_prefixes
         self._matchers: list[Matcher] = []  # type: ignore
+        self._mute_errors = mute_errors
+
+    def __repr__(
+        self,
+    ) -> str:
+        return (
+            f"<{self.__class__.__name__} {__version__}: {len(self._matchers)} matchers>"
+        )
 
     def add_matcher(
         self,
@@ -50,6 +60,7 @@ class Chatushka:
             matcher.add_commands_prefixes(
                 self._cmd_prefixes,
             )
+        logger.info(f"{self} + {matcher}")
         self._matchers.append(matcher)
 
     def add_cmd(
@@ -119,7 +130,7 @@ class Chatushka:
                 *patterns,
                 action=func,
                 chance_rate=chance_rate,
-                results_model=results_model
+                results_model=results_model,
             )
 
         return _wrapper
@@ -163,10 +174,15 @@ class Chatushka:
         api: TelegramBotAPI,
         offset: int | None,
     ) -> int | None:
-        updates, offset = await api.get_updates(offset)
+        try:
+            updates, offset = await api.get_updates(offset)
+        except (Exception, ChatushkaResponseError) as exc:
+            report_exc(exc)
+            return offset
         if not updates:
             return offset
-        await gather(
+        logger.info(f"{self} receive {len(updates)} updates from {offset=}")
+        results = await gather(
             *[
                 matcher(  # type: ignore
                     api=api,
@@ -174,8 +190,12 @@ class Chatushka:
                 )
                 for update in updates
                 for matcher in self._matchers
-            ]
+            ],
+            return_exceptions=True,
         )
+        for result in results:
+            if isinstance(result, Exception):
+                report_exc(result)
         return offset
 
     async def _loop(
@@ -195,6 +215,7 @@ class Chatushka:
     async def run(
         self,
     ) -> None:
+        logger.info(f"{self} (っ◔◡◔)っ start polling")
         async with self._lifespan(
             self,
         ):

@@ -1,13 +1,18 @@
 import asyncio
-import datetime
 import os
 import random
+from logging import basicConfig, getLogger, WARNING, DEBUG
 
 from pydantic import BaseModel
 
 import chatushka
 from example.constants import MAGIC_EIGHT_BALL_CHOICES
 
+basicConfig(
+    level=DEBUG,
+)
+getLogger("httpcore").setLevel(WARNING)
+getLogger("httpx").setLevel(WARNING)
 bot = chatushka.Chatushka(
     token=os.environ["CHATUSHKA_TOKEN"],
     cmd_prefixes=("!", "/"),
@@ -80,7 +85,9 @@ async def ping_handler(
     )
 
 
-class HelloResponse(BaseModel,):
+class HelloResponse(
+    BaseModel,
+):
     name: str
 
 

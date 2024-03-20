@@ -6,6 +6,7 @@ from httpx import AsyncClient, RequestError, Response
 
 from chatushka._constants import HTTP_REGULAR_TIMEOUT
 from chatushka._errors import ChatushkaResponseError
+from chatushka._logger import logger
 from chatushka._models import (
     ChatMemberAdministrator,
     ChatMemberOwner,
@@ -51,16 +52,24 @@ class TelegramBotAPI:
         )
         self._timeout = timeout
 
+    def __repr__(
+        self,
+    ) -> str:
+        return f"<{self.__class__.__name__}>"
+
     async def _api_request(
         self,
         api_method: str,
         **kwargs: Any,
     ) -> list[dict[str, Any]] | dict[str, Any]:
+        logger.debug(f"{self} >>> {api_method} >>> {kwargs}")
         response = await self._client.post(
             url=api_method,
             json=kwargs,
         )
-        return response.json()["result"]
+        data = response.json()["result"]
+        logger.debug(f"{self} <<< {api_method} <<< {response.text}")
+        return data
 
     async def __aenter__(
         self,
@@ -92,7 +101,8 @@ class TelegramBotAPI:
                 api_method="getUpdates",
                 **params,
             )
-        except RequestError:
+        except RequestError as exc:
+            logger.debug(f"{self.__class__.__name__} request:\n" f" error: {str(exc)}")
             return [], offset
         results = [Update.model_validate(entry) for entry in response]
         if results:

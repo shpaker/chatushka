@@ -179,7 +179,7 @@ class Chatushka:
             return offset
         if not updates:
             return offset
-        logger.info(f"{self} receive {len(updates)} updates from {offset=}")
+        logger.debug(f"{self} <<< {len(updates)} updates from {offset=}")
         results = await gather(
             *[
                 matcher(  # type: ignore

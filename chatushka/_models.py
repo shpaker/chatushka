@@ -67,7 +67,7 @@ class ChatMemberAdministrator(
     can_change_info: bool | None = None
     can_invite_users: bool | None = None
     can_post_messages: bool | None = None
-    can_edit_messages: bool | None =None
+    can_edit_messages: bool | None = None
     can_pin_messages: bool | None = None
 
 

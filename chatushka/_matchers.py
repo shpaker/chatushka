@@ -93,9 +93,7 @@ class BaseMatcher(
             }
         )
         sig = signature(self._action)
-        kwargs = {
-            param: kwargs.get(param) for param in sig.parameters if param in kwargs
-        }
+        kwargs = {param: kwargs.get(param) for param in sig.parameters if param in kwargs}
         if update and update.message is not None and "message" in sig.parameters:
             kwargs["message"] = update.message
         if iscoroutinefunction(self._action):
@@ -140,9 +138,7 @@ class CommandMatcher(
     ) -> None:
         if not prefixes:
             return
-        self._commands = tuple(
-            f"{prefix}{command}" for command in self._commands for prefix in prefixes
-        )
+        self._commands = tuple(f"{prefix}{command}" for command in self._commands for prefix in prefixes)
 
     def _make_args(
         self,
@@ -161,9 +157,7 @@ class CommandMatcher(
             return None
         case_sensitive = self._case_sensitive or False
         for command in self._commands:
-            if case_sensitive and update.message.text.upper().startswith(
-                command.upper()
-            ):
+            if case_sensitive and update.message.text.upper().startswith(command.upper()):
                 return self._make_args(update.message.text)
             if update.message.text.startswith(command):
                 return self._make_args(update.message.text)
@@ -186,10 +180,7 @@ class RegExMatcher(
             chance_rate=chance_rate,
             results_model=results_model,
         )
-        self._patterns = [
-            compile(pattern) if isinstance(pattern, str) else pattern
-            for pattern in patterns
-        ]
+        self._patterns = [compile(pattern) if isinstance(pattern, str) else pattern for pattern in patterns]
 
     def __repr__(
         self,
@@ -238,17 +229,9 @@ class EventMatcher(
         results = []
         if update.message and update.message.text and "on_message" in self._events:
             results.append("on_message")
-        if (
-            update.message
-            and update.message.new_chat_members
-            and "on_new_chat_members" in self._events
-        ):
+        if update.message and update.message.new_chat_members and "on_new_chat_members" in self._events:
             results.append("on_new_chat_members")
-        if (
-            update.message
-            and update.message.new_chat_members
-            and "on_left_chat_member" in self._events
-        ):
+        if update.message and update.message.new_chat_members and "on_left_chat_member" in self._events:
             results.append("on_left_chat_member")
         if not results:
             return None

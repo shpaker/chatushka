@@ -69,7 +69,9 @@ async def test_command_matcher_success(
         prefixes=prefixes,
     )
     update = make_update_data(text)
-    assert matcher._check(update=update) == ['bar',]
+    assert matcher._check(update=update) == [
+        "bar",
+    ]
     with raises(RuntimeError):
         await matcher._call_action(
             api=TelegramBotAPI(token="123:abc"),
@@ -117,7 +119,7 @@ async def test_regex_matcher_success(
         action=_func,
     )
     update = make_update_data("abyss")
-    assert matcher._check(update=update) == ['abyss']
+    assert matcher._check(update=update) == ["abyss"]
     with raises(RuntimeError):
         await matcher._call_action(
             api=TelegramBotAPI(token="123:abc"),

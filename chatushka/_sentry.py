@@ -7,7 +7,7 @@ from chatushka._errors import ChatushkaResponseError
 try:
     import sentry_sdk
 except ImportError:
-    sentry_sdk = None
+    sentry_sdk = None  # type: ignore
 
 
 def report_exc(

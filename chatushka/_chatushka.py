@@ -48,9 +48,7 @@ class Chatushka:
     def __repr__(
         self,
     ) -> str:
-        return (
-            f"<{self.__class__.__name__} {__version__}: {len(self._matchers)} matchers>"
-        )
+        return f"<{self.__class__.__name__} {__version__}: {len(self._matchers)} matchers>"
 
     def add_matcher(
         self,
@@ -216,7 +214,7 @@ class Chatushka:
         self,
     ) -> None:
         logger.info(f"{self} (っ◔◡◔)っ start polling")
-        async with self._lifespan(
+        async with self._lifespan(  # type: ignore
             self,
         ):
             await self._loop()

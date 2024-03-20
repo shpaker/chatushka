@@ -151,7 +151,7 @@ class TelegramBotAPI:
         permissions: ChatPermissions,
         until_date: datetime,
     ) -> bool:
-        return await self._api_request(
+        return await self._api_request(  # type: ignore
             "restrictChatMember",
             chat_id=chat_id,
             user_id=user_id,

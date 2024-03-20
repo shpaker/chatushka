@@ -4,14 +4,13 @@ from contextlib import (
     AbstractAsyncContextManager,
     asynccontextmanager,
 )
-from traceback import print_exc
 from typing import Any, final
 
-from chatushka._errors import ChatushkaResponseError
 from chatushka.__version__ import __version__
 from chatushka._constants import (
     HTTP_POOLING_TIMEOUT,
 )
+from chatushka._errors import ChatushkaResponseError
 from chatushka._logger import logger
 from chatushka._matchers import CommandMatcher, EventMatcher, Matcher, RegExMatcher
 from chatushka._models import Events

@@ -3,7 +3,7 @@ from collections.abc import Callable, Sequence
 from inspect import iscoroutinefunction, signature
 from random import random
 from re import Pattern, compile
-from typing import TypeVar, Any
+from typing import Any, TypeVar
 
 from pydantic import BaseModel
 

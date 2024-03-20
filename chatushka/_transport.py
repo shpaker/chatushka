@@ -102,7 +102,7 @@ class TelegramBotAPI:
                 **params,
             )
         except RequestError as exc:
-            logger.info(f"{self} <<< {str(exc)}")
+            logger.info(f"{self} <<< {exc!s}")
             return [], offset
         results = [Update.model_validate(entry) for entry in response]
         if results:

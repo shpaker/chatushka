@@ -5,7 +5,7 @@ from httpx import RequestNotRead
 from chatushka._errors import ChatushkaResponseError
 
 try:
-    import sentry_sdk
+    import sentry_sdk  # type: ignore
 except ImportError:
     sentry_sdk = None  # type: ignore
 

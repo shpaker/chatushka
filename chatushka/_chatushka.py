@@ -33,7 +33,6 @@ class Chatushka:
         token: str,
         cmd_prefixes: str | Sequence[str] = (),
         lifespan: AbstractAsyncContextManager | None = None,
-        mute_errors: bool = False,
     ) -> None:
         self._state: MutableMapping = {}
         self._lifespan = lifespan or _default_lifespan
@@ -42,7 +41,6 @@ class Chatushka:
             cmd_prefixes = [cmd_prefixes]
         self._cmd_prefixes = cmd_prefixes
         self._matchers: list[Matcher] = []  # type: ignore
-        self._mute_errors = mute_errors
 
     def __repr__(
         self,

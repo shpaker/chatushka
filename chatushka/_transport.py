@@ -2,7 +2,7 @@ from datetime import datetime
 from types import TracebackType
 from typing import Any, Literal
 
-from httpx import AsyncClient, RequestError, Response
+from httpx import AsyncClient, Response, TimeoutException
 
 from chatushka._constants import HTTP_REGULAR_TIMEOUT
 from chatushka._errors import ChatushkaResponseError
@@ -15,6 +15,7 @@ from chatushka._models import (
     Message,
     Update,
 )
+from chatushka._sentry import report_exc
 
 
 async def _raise_on_api_error_response_event_hook(
@@ -101,8 +102,11 @@ class TelegramBotAPI:
                 api_method="getUpdates",
                 **params,
             )
-        except RequestError as exc:
-            logger.info(f"{self} <<< {exc!s}")
+        except TimeoutException:
+            return [], offset
+        except Exception as exc:
+            report_exc(exc)
+            logger.error(f"{self} !!! {exc.__class__.__name__} ({exc!s})")
             return [], offset
         results = [Update.model_validate(entry) for entry in response]
         if results:

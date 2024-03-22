@@ -4,6 +4,7 @@ from contextlib import (
     AbstractAsyncContextManager,
     asynccontextmanager,
 )
+from re import RegexFlag
 from typing import Any, final
 
 from chatushka.__version__ import __version__
@@ -100,6 +101,7 @@ class Chatushka:
         self,
         *patterns: str,
         action: Callable,
+        re_flags: int | RegexFlag = 0,
         chance_rate: float = 1.0,
         results_model: type[Any] | None = None,
     ) -> None:
@@ -107,6 +109,7 @@ class Chatushka:
             RegExMatcher(
                 *patterns,
                 action=action,
+                re_flags=re_flags,
                 chance_rate=chance_rate,
                 results_model=results_model,
             )
@@ -115,6 +118,7 @@ class Chatushka:
     def regex(
         self,
         *patterns: str,
+        re_flags: int | RegexFlag = 0,
         chance_rate: float = 1.0,
         results_model: type[Any] | None = None,
     ) -> Callable:
@@ -124,6 +128,7 @@ class Chatushka:
             self.add_regex(
                 *patterns,
                 action=func,
+                re_flags=re_flags,
                 chance_rate=chance_rate,
                 results_model=results_model,
             )

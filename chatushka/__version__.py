@@ -1,2 +1,1 @@
-__VERSION__ = "$__VERSION__"
-__URL__ = "$__URL__"
+__version__ = "0.1.0"

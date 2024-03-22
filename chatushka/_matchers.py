@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable, Sequence
 from inspect import iscoroutinefunction, signature
 from random import random
-from re import Pattern, compile
+from re import Pattern, RegexFlag, compile
 from typing import Any, TypeVar
 
 from pydantic import BaseModel
@@ -172,6 +172,7 @@ class RegExMatcher(
         self,
         *patterns: str | Pattern,
         action: Callable,
+        re_flags: int | RegexFlag = 0,
         chance_rate: float = 1.0,
         results_model: type[Any] | None = None,
     ) -> None:
@@ -180,7 +181,9 @@ class RegExMatcher(
             chance_rate=chance_rate,
             results_model=results_model,
         )
-        self._patterns = [compile(pattern) if isinstance(pattern, str) else pattern for pattern in patterns]
+        self._patterns = [
+            compile(pattern, flags=re_flags) if isinstance(pattern, str) else pattern for pattern in patterns
+        ]
 
     def __repr__(
         self,

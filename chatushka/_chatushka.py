@@ -5,6 +5,7 @@ from contextlib import (
     asynccontextmanager,
 )
 from re import RegexFlag
+from traceback import print_exception
 from typing import Any, final
 
 from chatushka.__version__ import __version__
@@ -195,6 +196,7 @@ class Chatushka:
         )
         for result in results:
             if isinstance(result, Exception):
+                print_exception(result)
                 report_exc(result)
         return offset
 

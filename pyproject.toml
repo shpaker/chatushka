@@ -10,6 +10,7 @@ repository = "https://github.com/shpaker/chatushka"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0"
+aiocron = "^1.8"
 httpx = "*"
 pydantic = ">=2.0"
 sentry-sdk = {version = "^1.43.0", optional = true}

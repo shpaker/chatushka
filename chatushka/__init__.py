@@ -4,6 +4,7 @@ from chatushka._matchers import BaseMatcher, CommandMatcher, EventMatcher, RegEx
 from chatushka._models import Chat, ChatPermissions, Events, Message, Update, User
 from chatushka._transport import TelegramBotAPI
 
+__version__ = "0.1.0"
 __all__ = [
     "Chatushka",
     # errors

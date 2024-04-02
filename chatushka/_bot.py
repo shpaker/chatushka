@@ -73,7 +73,13 @@ class MatchersBot:
         def _wrapper(
             func,
         ):
-            job = aiocron.Cron(cron, self._call_scheduled, start=False, tz=tz, args=func)
+            job = aiocron.Cron(
+                spec=cron,
+                func=self._call_scheduled,
+                start=False,
+                tz=tz,
+                args=(func,),
+            )
             logger.info(f"{self} + {job}")
             self._schedulers.append(job)
 

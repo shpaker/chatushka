@@ -146,6 +146,7 @@ class MatchersBot:
             logger.info(f"{self} (っ◔◡◔)っ stop schedulers")
         for scheduler in self._schedulers:
             scheduler.stop()
+        logger.info(f"{self} (っ◔◡◔)っ closed")
 
     async def run(
         self,

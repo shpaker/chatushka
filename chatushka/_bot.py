@@ -37,6 +37,7 @@ class MatchersBot:
         self._cmd_prefixes = cmd_prefixes
         self._matchers: list[Matcher] = []  # type: ignore
         self._schedulers: list[aiocron.Cron] = []
+        self._closed: bool = True
 
     def __repr__(
         self,
@@ -112,7 +113,7 @@ class MatchersBot:
         self,
     ) -> None:
         offset: int | None = None
-        while True:
+        while not self._closed:
             async with TelegramBotAPI(
                 token=self._token,
                 timeout=HTTP_POOLING_TIMEOUT,
@@ -131,9 +132,10 @@ class MatchersBot:
             timeout=timeout,
         )
 
-    async def _close(
+    async def _stop(
         self,
     ) -> None:
+        self._closed = True
         if self._schedulers:
             logger.info(f"{self} (っ◔◡◔)っ stop schedulers")
         for scheduler in self._schedulers:
@@ -145,7 +147,7 @@ class MatchersBot:
         loop = get_event_loop()
         for sig in (signal.SIGINT, signal.SIGTERM):
             try:
-                loop.add_signal_handler(sig, callback=lambda: ensure_future(self._close()))
+                loop.add_signal_handler(sig, callback=lambda: ensure_future(self._stop()))
             except NotImplementedError:
                 break
         if self._schedulers:
@@ -153,5 +155,6 @@ class MatchersBot:
         for scheduler in self._schedulers:
             scheduler.start()
         logger.info(f"{self} (っ◔◡◔)っ start polling")
+        self._closed = False
         async with self._lifespan(self):  # type: ignore
             await self._loop()

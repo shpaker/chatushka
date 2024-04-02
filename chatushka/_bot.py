@@ -3,7 +3,6 @@ from asyncio import ensure_future, gather, get_event_loop
 from collections.abc import AsyncGenerator, MutableMapping, Sequence
 from contextlib import AbstractAsyncContextManager, asynccontextmanager
 from datetime import timezone, tzinfo
-from functools import partial
 from traceback import print_exception
 
 import aiocron  # type: ignore
@@ -59,6 +58,7 @@ class MatchersBot:
         self,
         func,
     ):
+        logger.info(f"{self} ::: scheduled call of {func.__name__}")
         async with self._make_api_client() as client:
             await func(
                 api=client,
@@ -72,12 +72,7 @@ class MatchersBot:
         def _wrapper(
             func,
         ):
-            job = aiocron.Cron(
-                cron,
-                func=partial(self._call_scheduled, func=func),
-                start=False,
-                tz=tz,
-            )
+            job = aiocron.Cron(cron, self._call_scheduled, start=False, tz=tz, args=func)
             logger.info(f"{self} + {job}")
             self._schedulers.append(job)
 

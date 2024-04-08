@@ -153,9 +153,8 @@ class BotBase:
                 loop.add_signal_handler(sig, callback=lambda: ensure_future(self._stop()))
             except NotImplementedError:
                 break
-        if self._schedulers:
-            logger.info(f"{self} (っ◔◡◔)っ start schedulers")
         for scheduler in self._schedulers:
+            logger.info(f"{self} (っ◔◡◔)っ start scheduler {scheduler!r}")
             scheduler.start()
         logger.info(f"{self} (っ◔◡◔)っ start polling")
         self._closed = False

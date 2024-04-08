@@ -1,16 +1,34 @@
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from re import RegexFlag
 from typing import Any, final
 
-from chatushka._bot import MatchersBot
+from chatushka._bot import BotBase
+from chatushka._handlers import make_id_handler, make_ping_handler
 from chatushka._matchers import CommandMatcher, EventMatcher, RegExMatcher
 from chatushka._models import Events
 
 
 @final
 class Chatushka(
-    MatchersBot,
+    BotBase,
 ):
+    def __init__(
+        self,
+        *,
+        token: str,
+        cmd_prefixes: str | Sequence[str] = "!",
+        id_command: str | None = "id",
+        ping_command: str | None = "ping",
+    ) -> None:
+        super().__init__(
+            token=token,
+            cmd_prefixes=cmd_prefixes,
+        )
+        if id_command:
+            self.add(make_id_handler(id_command))
+        if ping_command:
+            self.add(make_ping_handler(ping_command))
+
     def cmd(
         self,
         *commands: str,

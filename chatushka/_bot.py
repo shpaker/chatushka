@@ -1,7 +1,6 @@
 import signal
 from asyncio import ensure_future, gather, get_event_loop
-from collections.abc import AsyncGenerator, MutableMapping, Sequence
-from contextlib import AbstractAsyncContextManager, asynccontextmanager
+from collections.abc import Callable, Sequence
 from datetime import timezone, tzinfo
 from traceback import print_exception
 
@@ -14,30 +13,26 @@ from chatushka._matchers import CommandMatcher, Matcher, TelegramBotAPI
 from chatushka._sentry import report_exc
 
 
-@asynccontextmanager
-async def _default_lifespan(
-    _: "MatchersBot",
-) -> AsyncGenerator[None, None]:
-    yield
-
-
-class MatchersBot:
+class BotBase:
     def __init__(
         self,
         *,
         token: str,
-        cmd_prefixes: str | Sequence[str] = (),
-        lifespan: AbstractAsyncContextManager | None = None,
+        cmd_prefixes: str | Sequence[str],
     ) -> None:
-        self._state: MutableMapping = {}
-        self._lifespan = lifespan or _default_lifespan
+        self._matchers: list[Matcher] = []  # type: ignore
+        self._schedulers: list[aiocron.Cron] = []
         self._token = token
         if isinstance(cmd_prefixes, str):
             cmd_prefixes = [cmd_prefixes]
         self._cmd_prefixes = cmd_prefixes
-        self._matchers: list[Matcher] = []  # type: ignore
-        self._schedulers: list[aiocron.Cron] = []
         self._closed: bool = True
+
+    @property
+    def matchers(
+        self,
+    ) -> list[Matcher]:
+        return self._matchers
 
     def __repr__(
         self,
@@ -69,7 +64,7 @@ class MatchersBot:
         self,
         cron: str,
         tz: tzinfo = timezone.utc,
-    ):
+    ) -> Callable[[Callable], None]:
         def _wrapper(
             func,
         ):
@@ -80,7 +75,7 @@ class MatchersBot:
                 tz=tz,
                 args=(func,),
             )
-            logger.info(f"{self} + {job}")
+            logger.info(f"{self} + {job!r}")
             self._schedulers.append(job)
 
         return _wrapper
@@ -142,6 +137,7 @@ class MatchersBot:
         self,
     ) -> None:
         self._closed = True
+        logger.info(f"{self} (っ◔◡◔)っ stop chats reading")
         if self._schedulers:
             logger.info(f"{self} (っ◔◡◔)っ stop schedulers")
         for scheduler in self._schedulers:
@@ -163,5 +159,4 @@ class MatchersBot:
             scheduler.start()
         logger.info(f"{self} (っ◔◡◔)っ start polling")
         self._closed = False
-        async with self._lifespan(self):  # type: ignore
-            await self._loop()
+        await self._loop()

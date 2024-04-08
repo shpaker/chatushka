@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
+from asyncio import iscoroutinefunction
 from collections.abc import Callable, Sequence
-from inspect import iscoroutinefunction, signature
+from inspect import signature
 from random import random
 from re import Pattern, RegexFlag, compile
 from typing import Any, TypeVar
@@ -27,6 +28,12 @@ class BaseMatcher(
         self._chance_rate = chance_rate
         self._results_model = results_model
 
+    @property
+    def action(
+        self,
+    ) -> Callable:
+        return self._action
+
     @abstractmethod
     def _check(
         self,
@@ -46,11 +53,18 @@ class BaseMatcher(
         ) is None:
             return
         logger.info(f"{self} matched with update_id={update.update_id} {results=}")
-        await self._call_action(
-            api=api,
-            update=update,
-            results=results,
-        )
+        if (
+            result := await self._call_action(
+                api=api,
+                update=update,
+                results=results,
+            )
+        ) and update.message:
+            await api.send_message(
+                chat_id=update.message.chat.id,
+                reply_to_message_id=update.message.message_id,
+                text=result,
+            )
 
     def _get_chance(
         self,
@@ -77,9 +91,9 @@ class BaseMatcher(
         api: TelegramBotAPI,
         update: Update,
         results: Any,
-    ) -> None:
+    ) -> str | None:
         if not self._get_chance():
-            return
+            return None
         kwargs = {}
         results_from_model = self._make_results_model(results)
         kwargs.update(
@@ -97,9 +111,8 @@ class BaseMatcher(
         if update and update.message is not None and "message" in sig.parameters:
             kwargs["message"] = update.message
         if iscoroutinefunction(self._action):
-            await self._action(**kwargs)
-            return
-        self._action(**kwargs)
+            return await self._action(**kwargs)
+        return self._action(**kwargs)
 
 
 class CommandMatcher(

@@ -118,7 +118,7 @@ class TelegramBotAPI:
         chat_id: int,
         text: str,
         reply_to_message_id: int | None = None,
-        parse_mode: Literal["html", "markdown"] = "html",
+        parse_mode: Literal["html", "markdown"] = "markdown",
         disable_web_page_preview: bool = False,
     ) -> Message:
         result = await self._api_request(

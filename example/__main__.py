@@ -15,7 +15,6 @@ getLogger("httpcore").setLevel(WARNING)
 getLogger("httpx").setLevel(WARNING)
 bot = chatushka.Chatushka(
     token=os.environ["CHATUSHKA_TOKEN"],
-    cmd_prefixes=("!", "/"),
 )
 
 
@@ -55,34 +54,9 @@ async def luk_handler(
     )
 
 
-@bot.cmd("id")
-async def id_handler(
-    api: chatushka.TelegramBotAPI,
-    message: chatushka.Message,
-    user: chatushka.User,
-    chat: chatushka.Chat,
-) -> None:
-    text = f"*USER_ID:* `{user.id}`"
-    if user.id != chat.id:
-        text += f"\n*CHAT_ID:* `{chat.id}`"
-    await api.send_message(
-        chat_id=chat.id,
-        text=text,
-        reply_to_message_id=message.message_id,
-        parse_mode="markdown",
-    )
-
-
-@bot.cmd("ping")
-async def ping_handler(
-    api: chatushka.TelegramBotAPI,
-    message: chatushka.Message,
-) -> None:
-    await api.send_message(
-        chat_id=message.chat.id,
-        text="pong",
-        reply_to_message_id=message.message_id,
-    )
+@bot.cmd("foo")
+def foo_handler() -> str:
+    return "bar"
 
 
 class HelloResponse(

@@ -4,24 +4,24 @@ from chatushka._matchers import BaseMatcher, CommandMatcher, EventMatcher, RegEx
 from chatushka._models import Chat, ChatPermissions, Events, Message, Update, User
 from chatushka._transport import TelegramBotAPI
 
-__version__ = "0.1.0"
+__version__ = "0.0.0"
 __all__ = [
+    # matchers
+    "BaseMatcher",
+    "Chat",
+    "ChatPermissions",
     "Chatushka",
     # errors
     "ChatushkaError",
     "ChatushkaResponseError",
-    # matchers
-    "BaseMatcher",
     "CommandMatcher",
     "EventMatcher",
-    "RegExMatcher",
     # models
     "Events",
-    "Chat",
-    "ChatPermissions",
     "Message",
-    "Update",
-    "User",
+    "RegExMatcher",
     # transport
     "TelegramBotAPI",
+    "Update",
+    "User",
 ]

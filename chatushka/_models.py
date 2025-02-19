@@ -38,7 +38,7 @@ class User(
 
     @property
     def readable_name(self) -> str:
-        return f"{self.first_name}{' '+self.last_name if self.last_name else ''}"
+        return f"{self.first_name}{' ' + self.last_name if self.last_name else ''}"
 
 
 class ChatMemberBase(
